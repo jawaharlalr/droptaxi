@@ -48,7 +48,6 @@ const BookingForm = ({
   setPhone,
   onSubmit,
   today,
-  isNameEditable,
 }) => {
   const [isBooked, setIsBooked] = useState(false);
 
@@ -184,10 +183,7 @@ const BookingForm = ({
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          disabled={!isNameEditable}
-          className={`w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80 ${
-            !isNameEditable && 'opacity-60 cursor-not-allowed'
-          }`}
+          className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
           autoComplete="name"
         />
       </label>
