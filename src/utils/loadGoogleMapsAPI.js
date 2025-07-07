@@ -5,7 +5,8 @@ const loadGoogleMapsAPI = (apiKeyFromArgs) => {
   const fallbackKey = 'AIzaSyAwFp1cENKvgJCENmg9ULN5pmPDgRzUqN4';
 
   // Get key from env (works with both CRA and Vite)
-  const envKey = typeof process !== 'undefined' &&
+  const envKey =
+    typeof process !== 'undefined' &&
     process.env &&
     (process.env.REACT_APP_GOOGLE_MAPS_API_KEY || process.env.VITE_GOOGLE_MAPS_API_KEY);
 
@@ -46,7 +47,7 @@ const loadGoogleMapsAPI = (apiKeyFromArgs) => {
     };
 
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=__initGoogleMaps`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=__initGoogleMaps&loading=async&v=weekly`;
     script.async = true;
     script.defer = true;
     script.onerror = (err) => {

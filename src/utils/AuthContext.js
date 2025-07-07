@@ -7,9 +7,9 @@ import { doc, getDoc } from 'firebase/firestore';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null); // Optional: Needed only if admin needs user info
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {

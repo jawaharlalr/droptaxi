@@ -27,27 +27,27 @@ const BookingForm = ({
   tripType,
   setTripType,
   source,
+  setSource,
   destination,
-  sourceRef,
-  destinationRef,
+  setDestination,
   date,
+  setDate,
   returnDate,
+  setReturnDate,
   vehicleType,
   setVehicleType,
-  name,
-  phone,
   cost,
   distance,
   duration,
-  message,
-  setSource,
-  setDestination,
-  setDate,
-  setReturnDate,
+  name,
   setName,
+  phone,
   setPhone,
+  message,
   onSubmit,
   today,
+  sourceRef,
+  destinationRef,
 }) => {
   const [isBooked, setIsBooked] = useState(false);
 
@@ -60,7 +60,8 @@ const BookingForm = ({
     vehicleType &&
     cost &&
     distance &&
-    duration;
+    duration &&
+    (tripType === 'single' || returnDate); // ✅ only require returnDate for round
 
   const handleSubmit = async () => {
     if (!isFormValid) return;
@@ -93,56 +94,52 @@ const BookingForm = ({
       </div>
 
       {/* Source and Destination */}
-      <label className="block text-sm">
-        Source
-        <input
-          name="source"
-          type="text"
-          autoComplete="address-line1"
-          value={source}
-          ref={sourceRef}
-          onChange={(e) => setSource(e.target.value)}
-          className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
-        />
-      </label>
-      <label className="block text-sm">
-        Destination
-        <input
-          name="destination"
-          type="text"
-          autoComplete="address-line2"
-          value={destination}
-          ref={destinationRef}
-          onChange={(e) => setDestination(e.target.value)}
-          className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
-        />
-      </label>
+      <label htmlFor="source" className="block text-sm">Source</label>
+      <input
+        id="source"
+        type="text"
+        value={source}
+        ref={sourceRef}
+        onChange={(e) => setSource(e.target.value)}
+        className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
+      />
 
-      {/* Dates */}
+      <label htmlFor="destination" className="block mt-4 text-sm">Destination</label>
+      <input
+        id="destination"
+        type="text"
+        value={destination}
+        ref={destinationRef}
+        onChange={(e) => setDestination(e.target.value)}
+        className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
+      />
+
+      {/* Date and Return Date */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <label className="block text-sm">
-          Date
+        <div>
+          <label htmlFor="date" className="block text-sm">Date</label>
           <input
-            name="date"
+            id="date"
             type="date"
             min={today}
             value={date}
             onChange={(e) => setDate(e.target.value)}
             className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
           />
-        </label>
+        </div>
+
         {tripType === 'round' && (
-          <label className="block text-sm">
-            Return Date
+          <div>
+            <label htmlFor="returnDate" className="block text-sm">Return Date</label>
             <input
-              name="returnDate"
+              id="returnDate"
               type="date"
               min={date}
               value={returnDate}
               onChange={(e) => setReturnDate(e.target.value)}
               className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
             />
-          </label>
+          </div>
         )}
       </div>
 
@@ -176,32 +173,29 @@ const BookingForm = ({
       </div>
 
       {/* Name and Phone */}
-      <label className="block text-sm">
-        Your Name
-        <input
-          name="name"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
-          autoComplete="name"
-        />
-      </label>
-      <label className="block text-sm">
-        Mobile Number
-        <input
-          name="phone"
-          type="tel"
-          autoComplete="tel"
-          value={phone}
-          onChange={(e) => {
-            const val = e.target.value;
-            if (/^\d{0,10}$/.test(val)) setPhone(val);
-          }}
-          className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
-          placeholder="10-digit Mobile Number"
-        />
-      </label>
+      <label htmlFor="name" className="block text-sm">Your Name</label>
+      <input
+        id="name"
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
+        autoComplete="name"
+      />
+
+      <label htmlFor="phone" className="block mt-4 text-sm">Mobile Number</label>
+      <input
+        id="phone"
+        type="tel"
+        autoComplete="tel"
+        value={phone}
+        onChange={(e) => {
+          const val = e.target.value;
+          if (/^\d{0,10}$/.test(val)) setPhone(val);
+        }}
+        className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
+        placeholder="10-digit Mobile Number"
+      />
 
       {/* Trip Summary */}
       <AnimatePresence>

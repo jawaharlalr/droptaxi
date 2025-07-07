@@ -1,8 +1,4 @@
-// src/pages/Home.jsx
-import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../utils/AuthContext';
-
+import React, { useState, useRef } from 'react';
 import BookingForm from '../components/BookingForm';
 import usePlacesAutocomplete from '../hooks/usePlacesAutocomplete';
 import useDistanceCalculator from '../hooks/useDistanceCalculator';
@@ -28,14 +24,7 @@ const Home = () => {
   const sourceRef = useRef(null);
   const destinationRef = useRef(null);
 
-  const { user } = useAuth();
-  const navigate = useNavigate();
-
   const today = new Date().toISOString().split('T')[0];
-
-  useEffect(() => {
-    if (user?.displayName) setName(user.displayName);
-  }, [user]);
 
   const [sourcePlaceId, setSourcePlaceId] = useState(null);
   const [destinationPlaceId, setDestinationPlaceId] = useState(null);
@@ -56,16 +45,16 @@ const Home = () => {
     setDistance,
     setDuration,
     setCost,
-    setMessage
+    setMessage,
+    tripType
   );
 
   const handleBooking = async () => {
-    if (!user) return navigate('/login');
-
     if (!source || !destination || !date || !cost || !name || !phone) {
       setMessage('Please fill all required fields and wait for the estimate.');
       return;
     }
+
     if (!validatePhone(phone)) {
       setMessage('Enter a valid 10-digit phone number.');
       return;
@@ -73,7 +62,6 @@ const Home = () => {
 
     try {
       await submitBooking({
-        userId: user.uid,
         name,
         phone,
         tripType,
@@ -100,6 +88,7 @@ const Home = () => {
       setDuration(null);
       setCost(null);
       setPhone('');
+      setName('');
     } catch {
       setMessage('❌ Error submitting booking. Please try again.');
     }
@@ -120,27 +109,22 @@ const Home = () => {
             returnDate={returnDate}
             setReturnDate={setReturnDate}
             today={today}
-
             source={source}
             setSource={setSource}
             destination={destination}
             setDestination={setDestination}
             sourceRef={sourceRef}
             destinationRef={destinationRef}
-
             vehicleType={vehicleType}
             setVehicleType={setVehicleType}
-
             distance={distance}
             duration={duration}
             cost={cost}
-
             name={name}
             setName={setName}
             phone={phone}
             setPhone={setPhone}
-            isNameEditable={!user?.displayName}
-
+            isNameEditable={true}
             message={message}
             onSubmit={handleBooking}
           />

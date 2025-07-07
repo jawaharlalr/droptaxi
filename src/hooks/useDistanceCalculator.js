@@ -8,7 +8,9 @@ const useDistanceCalculator = (
   setDuration,
   setCost,
   setMessage,
-  tripType
+  tripType,
+  setSingleTripCost,
+  setRoundTripCost
 ) => {
   useEffect(() => {
     if (sourcePlaceId && destinationPlaceId && vehicleType) {
@@ -22,45 +24,44 @@ const useDistanceCalculator = (
           unitSystem: window.google.maps.UnitSystem.METRIC,
         },
         (response, status) => {
-          if (status === 'OK') {
-            const result = response.rows[0].elements[0];
-
-            if (result.status === 'OK') {
-              let km = result.distance.value / 1000;
-              let mins = result.duration.value / 60;
-
-              // If round trip, double distance & duration
-              if (tripType === 'round') {
-                km *= 2;
-                mins *= 2;
-              }
-
-              // Fare rates per km
-              const rates = {
-                sedan: { single: 14, round: 13 },
-                muv: { single: 18, round: 17 },
-                innova: { single: 19, round: 18 },
-              };
-
-              const rateObj = rates[vehicleType];
-              if (!rateObj) {
-                setMessage('Invalid vehicle type selected.');
-                return;
-              }
-
-              const rate = tripType === 'round' ? rateObj.round : rateObj.single;
-              const price = Math.round(km * rate);
-
-              setDistance(km.toFixed(2));
-              setDuration(Math.round(mins));
-              setCost(price);
-              setMessage('');
-            } else {
-              setMessage('Distance calculation failed.');
-            }
-          } else {
+          if (status !== 'OK') {
             setMessage('Google Maps error.');
+            return;
           }
+
+          const result = response.rows[0].elements[0];
+          if (result.status !== 'OK') {
+            setMessage('Distance calculation failed.');
+            return;
+          }
+
+          const km = result.distance.value / 1000;
+          const mins = result.duration.value / 60;
+
+          const rates = {
+            sedan: { single: 14, round: 13 },
+            muv: { single: 18, round: 17 },
+            innova: { single: 19, round: 18 },
+          };
+
+          const rateObj = rates[vehicleType];
+          if (!rateObj) {
+            setMessage('Invalid vehicle type selected.');
+            return;
+          }
+
+          const singleTripCost = Math.round(km * rateObj.single);
+          const roundTripCost = Math.round(km * rateObj.round); // No driver bata
+
+          const finalCost = tripType === 'round' ? roundTripCost : singleTripCost;
+
+          setDistance(km.toFixed(2));
+          setDuration(Math.round(mins));
+          setCost(finalCost);
+          setMessage('');
+
+          if (setSingleTripCost) setSingleTripCost(singleTripCost);
+          if (setRoundTripCost) setRoundTripCost(roundTripCost);
         }
       );
     }
@@ -73,6 +74,8 @@ const useDistanceCalculator = (
     setDuration,
     setCost,
     setMessage,
+    setSingleTripCost,
+    setRoundTripCost,
   ]);
 };
 
