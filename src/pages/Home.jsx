@@ -99,8 +99,8 @@ const Home = () => {
       className="min-h-screen bg-center bg-cover"
       style={{ backgroundImage: "url('taxi.jpg')" }}
     >
-      <div className="grid min-h-screen grid-cols-1 gap-8 p-6 text-white md:grid-cols-2 bg-black/70">
-        <div className="p-6 shadow-lg bg-white/10 backdrop-blur-sm rounded-xl">
+      <div className="flex items-center justify-center min-h-screen p-6 bg-black/70">
+        <div className="w-full max-w-3xl p-8 text-white shadow-lg bg-white/10 backdrop-blur-sm rounded-xl">
           <BookingForm
             tripType={tripType}
             setTripType={setTripType}

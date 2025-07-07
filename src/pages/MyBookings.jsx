@@ -18,7 +18,11 @@ const MyBookings = () => {
 
   useEffect(() => {
     const fetchBookings = async () => {
-      if (phone.length !== 10) return;
+      if (phone.length !== 10) {
+        setBookings([]);
+        setSearched(false);
+        return;
+      }
 
       setLoading(true);
       try {
@@ -43,10 +47,10 @@ const MyBookings = () => {
   }, [phone]);
 
   const toggleExpand = (id) => {
-    setExpandedId((prev) => (prev === id ? null : id));
+    setExpandedId(prev => (prev === id ? null : id));
   };
 
-  const toNum = (val) => typeof val === 'number' ? val : parseFloat(val) || 0;
+  const toNum = (val) => (typeof val === 'number' ? val : parseFloat(val) || 0);
 
   const formatDuration = (minutes) => {
     const h = Math.floor(minutes / 60);
