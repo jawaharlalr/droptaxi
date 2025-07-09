@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { db } from '../utils/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { Link } from 'react-router-dom';
+import { useAuth } from '../utils/AuthContext';
+import { Link, useNavigate } from 'react-router-dom';
 
 const vehicleLabels = {
   sedan: 'Sedan (4+1 Seater)',
@@ -10,37 +11,41 @@ const vehicleLabels = {
 };
 
 const MyBookings = () => {
-  const [phone, setPhone] = useState('');
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
+  const [error, setError] = useState('');
 
-  const handleSearch = async () => {
-    const cleanPhone = phone.replace(/\D/g, '').slice(0, 10);
-    if (cleanPhone.length !== 10) {
-      setBookings([]);
-      setSearched(true);
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
       return;
     }
 
-    setLoading(true);
-    try {
-      const q = query(collection(db, 'bookings'), where('phone', '==', cleanPhone));
-      const snapshot = await getDocs(q);
-      const results = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setBookings(results);
-    } catch (err) {
-      console.error('Error fetching bookings:', err);
-      setBookings([]);
-    } finally {
-      setLoading(false);
-      setSearched(true);
-    }
-  };
+    const fetchBookings = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        // ✅ Securely fetch bookings based on userId
+        const q = query(collection(db, 'bookings'), where('userId', '==', user.uid));
+        const snapshot = await getDocs(q);
+        const results = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setBookings(results);
+      } catch (err) {
+        console.error('Error fetching bookings:', err);
+        setError('❌ Failed to load bookings. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBookings();
+  }, [user, navigate]);
 
   const toggleExpand = (id) => {
     setExpandedId(prev => (prev === id ? null : id));
@@ -79,7 +84,7 @@ const MyBookings = () => {
       <div className="relative z-10 max-w-4xl p-4 mx-auto mt-10">
         <div className="flex flex-col items-center justify-between mb-6 md:flex-row">
           <h2 className="mb-4 text-3xl font-bold text-center text-white md:mb-0 md:text-left">
-            Search Your Bookings
+            Your Bookings
           </h2>
           <Link
             to="/"
@@ -89,28 +94,12 @@ const MyBookings = () => {
           </Link>
         </div>
 
-        {/* Phone Input */}
-        <div className="flex flex-col items-center w-full gap-2 mx-auto mb-8 md:w-1/2">
-          <input
-            type="tel"
-            placeholder="Enter your 10-digit phone number"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-md focus:outline-none"
-          />
-          <button
-            onClick={handleSearch}
-            className="w-full px-4 py-2 font-semibold text-white bg-blue-700 rounded hover:bg-blue-800"
-          >
-            Search Booking
-          </button>
-        </div>
+        {/* Error message */}
+        {error && <p className="text-center text-red-300">{error}</p>}
 
         {/* Results */}
         {loading ? (
           <p className="text-center text-gray-200">Loading...</p>
-        ) : !searched ? (
-          <p className="text-center text-gray-200">Enter your phone number to view bookings.</p>
         ) : bookings.length === 0 ? (
           <p className="text-center text-gray-200">No bookings found.</p>
         ) : (

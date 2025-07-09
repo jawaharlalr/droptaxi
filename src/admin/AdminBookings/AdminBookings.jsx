@@ -9,10 +9,13 @@ const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [editValues, setEditValues] = useState({});
   const [expandedId, setExpandedId] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // 🔄 Fetch bookings
   const fetchBookings = async () => {
+    setLoading(true);
     try {
       const snapshot = await getDocs(collection(db, 'bookings'));
       const data = snapshot.docs.map((doc, i) => ({
@@ -21,6 +24,7 @@ const AdminBookings = () => {
         index: i + 1,
       }));
       setBookings(data);
+
       const initial = {};
       data.forEach((b) => {
         initial[b.id] = {
@@ -45,7 +49,7 @@ const AdminBookings = () => {
     if (window.confirm('Delete this booking permanently?')) {
       try {
         await deleteDoc(doc(db, 'bookings', id));
-        fetchBookings();
+        fetchBookings(); // 🔄 Refresh
       } catch {
         alert('Failed to delete booking.');
       }
@@ -62,13 +66,50 @@ const AdminBookings = () => {
 
   if (authLoading) return <p className="mt-10 text-center">Checking access…</p>;
 
+  // ✅ Filter bookings based on status
+  const filteredBookings =
+    statusFilter === 'all'
+      ? bookings
+      : bookings.filter((b) => {
+          const status = (b.status || '').toLowerCase();
+          if (statusFilter === 'pending') {
+            return status === 'yet to confirm' || status === 'pending';
+          }
+          return status === statusFilter;
+        });
+
+  // 🎛️ Filter dropdown options
+  const statusOptions = [
+    { label: 'All', value: 'all' },
+    { label: 'Pending (New)', value: 'pending' },
+    { label: 'Confirmed', value: 'confirmed' },
+    { label: 'Completed', value: 'completed' },
+    { label: 'Cancelled', value: 'cancelled' },
+  ];
+
   return (
     <div className="p-6 mx-auto max-w-7xl">
-      <h2 className="mb-6 text-3xl font-bold text-center">Manage Bookings</h2>
+      <div className="flex flex-col items-center justify-between gap-4 mb-6 sm:flex-row">
+        <h2 className="text-3xl font-bold">Manage Bookings</h2>
+        <select
+          className="p-2 text-sm border rounded"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          {statusOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {loading ? (
         <p>Loading bookings…</p>
       ) : error ? (
         <div className="p-4 text-red-700 bg-red-100 rounded">{error}</div>
+      ) : filteredBookings.length === 0 ? (
+        <p>No bookings found for selected status.</p>
       ) : (
         <div className="overflow-auto border border-gray-300 rounded">
           <table className="min-w-full text-sm text-left text-black bg-white">
@@ -86,7 +127,7 @@ const AdminBookings = () => {
               </tr>
             </thead>
             <tbody>
-              {bookings.map((b) => (
+              {filteredBookings.map((b) => (
                 <BookingRow
                   key={b.id}
                   booking={b}

@@ -12,6 +12,7 @@ import Home from './pages/Home';
 import MyBookings from './pages/MyBookings';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import LoginPage from './pages/LoginPage';
 
 import AdminDashboard from './admin/AdminDashboard';
 import AdminLogin from './admin/AdminLogin';
@@ -22,8 +23,17 @@ const LayoutWrapper = ({ children }) => {
   const location = useLocation();
   const path = location.pathname;
 
-  const hideLayoutRoutes = ['/admin', '/admin-login', '/my-bookings'];
-  const shouldHideLayout = hideLayoutRoutes.includes(path) || path.startsWith('/admin/');
+  // ❌ Hide layout on these pages
+  const hideLayoutRoutes = [
+    '/admin',
+    '/admin-login',
+    '/login',
+    '/my-bookings',
+  ];
+
+  // Hide layout if the route matches or starts with '/admin/'
+  const shouldHideLayout =
+    hideLayoutRoutes.includes(path) || path.startsWith('/admin/');
 
   return (
     <>
@@ -44,12 +54,13 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/my-bookings" element={<MyBookings />} />
+          <Route path="/login" element={<LoginPage />} />
 
-          {/* Admin Login Routes */}
+          {/* Admin Login */}
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin-login" element={<AdminLogin />} />
 
-          {/* Admin Pages */}
+          {/* Admin Dashboard Pages */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/users" element={<ManageUsers />} />
           <Route path="/admin/bookings" element={<AdminBookings />} />

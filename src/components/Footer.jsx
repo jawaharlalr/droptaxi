@@ -21,21 +21,20 @@ const Footer = () => {
 
         {/* Quick Links */}
         <div>
-          <h4 className="mb-3 text-lg font-bold">Quick Links</h4>
-          <ul className="space-y-2">
-            <li><Link to="/" className="block transition-transform duration-200 hover:scale-105">Home</Link></li>
-            <li><Link to="/about" className="block transition-transform duration-200 hover:scale-105">About Us</Link></li>
-            <li><Link to="/contact" className="block transition-transform duration-200 hover:scale-105">Contact Us</Link></li>
-            <li><Link to="/my-bookings" className="block transition-transform duration-200 hover:scale-105">My Bookings</Link></li>
+  <h4 className="mb-3 text-lg font-bold">Quick Links</h4>
+  <ul className="space-y-2">
+    <li><Link to="/about" className="inline-block transition-transform duration-200 hover:scale-105">About Us</Link></li>
+    <li><Link to="/contact" className="inline-block transition-transform duration-200 hover:scale-105">Contact Us</Link></li>
+    <li><Link to="/my-bookings" className="inline-block transition-transform duration-200 hover:scale-105">My Bookings</Link></li>
+  </ul>
+</div>
 
-          </ul>
-        </div>
 
         {/* Contact Info */}
         <div>
           <h4 className="mb-3 text-lg font-bold">Contact</h4>
           <p className="mb-1">📧 support@pranavtaxi.com</p>
-          <p className="mb-1">📞 +91 98765 43210</p>
+          <p className="mb-1">📞 +91 9884949171</p>
           <p>📍 Chennai, Tamil Nadu</p>
         </div>
       </div>

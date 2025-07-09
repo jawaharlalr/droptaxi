@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import TripSummary from './TripSummary';
+import { useAuth } from '../utils/AuthContext'; // ✅
+import { FiLoader } from 'react-icons/fi'; // Spinner for loading
 
 const vehicleOptions = [
   {
@@ -24,32 +26,21 @@ const vehicleOptions = [
 ];
 
 const BookingForm = ({
-  tripType,
-  setTripType,
-  source,
-  setSource,
-  destination,
-  setDestination,
-  date,
-  setDate,
-  returnDate,
-  setReturnDate,
-  vehicleType,
-  setVehicleType,
-  cost,
-  distance,
-  duration,
-  name,
-  setName,
-  phone,
-  setPhone,
-  message,
-  onSubmit,
-  today,
-  sourceRef,
-  destinationRef,
+  tripType, setTripType,
+  source, setSource,
+  destination, setDestination,
+  date, setDate,
+  returnDate, setReturnDate,
+  vehicleType, setVehicleType,
+  cost, distance, duration,
+  name, setName,
+  phone, setPhone,
+  message, onSubmit,
+  today, sourceRef, destinationRef,
 }) => {
   const [isBooked, setIsBooked] = useState(false);
+  const [submitting, setSubmitting] = useState(false); // ⏳
+  const { user, loginWithGoogle } = useAuth(); // ✅
 
   const isFormValid =
     source &&
@@ -61,13 +52,28 @@ const BookingForm = ({
     cost &&
     distance &&
     duration &&
-    (tripType === 'single' || returnDate); // ✅ only require returnDate for round
+    (tripType === 'single' || returnDate);
 
   const handleSubmit = async () => {
-    if (!isFormValid) return;
-    await onSubmit();
-    setIsBooked(true);
-    setTimeout(() => setIsBooked(false), 3000);
+    if (!isFormValid || submitting) return;
+
+    try {
+      setSubmitting(true);
+
+      // 🔐 Ask user to log in with Google if not logged in
+      if (!user) {
+        await loginWithGoogle(); // Uses signInWithPopup internally
+      }
+
+      await onSubmit(); // Submit booking
+      setIsBooked(true);
+      setTimeout(() => setIsBooked(false), 3000);
+    } catch (err) {
+      console.error('Booking failed:', err.message);
+      alert('Booking failed: ' + err.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -93,7 +99,7 @@ const BookingForm = ({
         ))}
       </div>
 
-      {/* Source and Destination */}
+      {/* Source & Destination */}
       <label htmlFor="source" className="block text-sm">Source</label>
       <input
         id="source"
@@ -114,7 +120,7 @@ const BookingForm = ({
         className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
       />
 
-      {/* Date and Return Date */}
+      {/* Date & Return Date */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
           <label htmlFor="date" className="block text-sm">Date</label>
@@ -143,7 +149,7 @@ const BookingForm = ({
         )}
       </div>
 
-      {/* Vehicle Type */}
+      {/* Vehicle Selection */}
       <div>
         <span className="block mb-2 text-sm">Select Vehicle</span>
         <div className="flex justify-between gap-2">
@@ -172,7 +178,7 @@ const BookingForm = ({
         </div>
       </div>
 
-      {/* Name and Phone */}
+      {/* Name & Phone */}
       <label htmlFor="name" className="block text-sm">Your Name</label>
       <input
         id="name"
@@ -197,7 +203,7 @@ const BookingForm = ({
         placeholder="10-digit Mobile Number"
       />
 
-      {/* Trip Summary */}
+      {/* Summary */}
       <AnimatePresence>
         {isFormValid && (
           <motion.div
@@ -233,14 +239,15 @@ const BookingForm = ({
         ) : (
           <button
             onClick={handleSubmit}
-            disabled={!isFormValid}
-            className={`w-full px-6 py-3 rounded-xl font-semibold transition ${
-              isFormValid
+            disabled={!isFormValid || submitting}
+            className={`w-full px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition ${
+              isFormValid && !submitting
                 ? 'bg-green-500 hover:bg-green-600 text-white'
                 : 'bg-gray-400 text-white cursor-not-allowed'
             }`}
           >
-            Confirm Booking
+            {submitting && <FiLoader className="animate-spin" />}
+            {submitting ? 'Processing…' : 'Confirm Booking'}
           </button>
         )}
       </div>

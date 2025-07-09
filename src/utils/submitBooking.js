@@ -1,4 +1,6 @@
-import { collection, addDoc, Timestamp, setDoc, doc } from 'firebase/firestore';
+// src/utils/submitBooking.js
+
+import { doc, setDoc, Timestamp } from 'firebase/firestore';
 import { db } from './firebase';
 
 /** Generate a booking ID like: PV6789-John-1432 */
@@ -11,14 +13,17 @@ const generateBookingId = (phone, name) => {
   return `PV${last4}-${firstName}-${hr}${min}`;
 };
 
-/** Submit a booking (works for both public + authenticated flows) */
+/** Submit a booking (only for authenticated users) */
 const submitBooking = async (bookingData) => {
   try {
-    /* ------------------------- Validate required fields -------------------- */
+    if (!bookingData.userId) {
+      throw new Error('You must be logged in to submit a booking.');
+    }
+
     const required = [
       'name', 'phone', 'tripType', 'vehicleType',
       'source', 'destination', 'date',
-      'cost', 'duration', 'distance'
+      'cost', 'duration', 'distance', 'userId'
     ];
     if (bookingData.tripType === 'round') required.push('returnDate');
 
@@ -29,18 +34,17 @@ const submitBooking = async (bookingData) => {
       }
     }
 
-    /* --------------------------- Normalise values -------------------------- */
     const name         = bookingData.name.trim();
     const phone        = bookingData.phone.trim();
     const tripType     = bookingData.tripType;
     const vehicleType  = bookingData.vehicleType.trim().toLowerCase();
     const source       = bookingData.source.trim();
     const destination  = bookingData.destination.trim();
-    const date         = bookingData.date;        // keep as string (e.g. 2025‑07‑09)
+    const date         = bookingData.date;
     const cost         = Number(bookingData.cost);
     const duration     = Number(bookingData.duration);
     const distance     = Number(bookingData.distance);
-    const userId       = bookingData.userId || null;       // when authenticated
+    const userId       = bookingData.userId;
 
     if ([cost, duration, distance].some(n => isNaN(n))) {
       throw new Error('Cost, duration or distance is not a valid number.');
@@ -56,7 +60,6 @@ const submitBooking = async (bookingData) => {
       }
     }
 
-    /* ------------------------- Assemble Firestore doc ---------------------- */
     const bookingId = generateBookingId(phone, name);
     const newBooking = {
       name,
@@ -72,22 +75,14 @@ const submitBooking = async (bookingData) => {
       bookingId,
       status: 'Yet to Confirm',
       createdAt: Timestamp.now(),
+      userId,
       ...(tripType === 'round' && { returnDate, returnDistance }),
-      ...(userId && { userId })                    // only if supplied
     };
 
-    /* ------------------------------ Firestore writes ----------------------- */
-    await addDoc(collection(db, 'bookings'), newBooking);
-
-    // Store / merge basic user info by phone (optional, no auth needed)
-    await setDoc(
-      doc(db, 'users', phone),
-      { name, phone, updatedAt: Timestamp.now() },
-      { merge: true }
-    );
+    // 🔐 Use setDoc with known ID to match security rules
+    await setDoc(doc(db, 'bookings', bookingId), newBooking);
 
     return { success: true };
-
   } catch (err) {
     console.error('❌ submitBooking error:', err);
     throw new Error('❌ Error submitting booking. Please try again.');

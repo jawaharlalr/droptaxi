@@ -1,4 +1,9 @@
+// src/pages/Home.jsx
+
 import React, { useState, useRef } from 'react';
+import { useAuth } from '../utils/AuthContext';
+import { useNavigate } from 'react-router-dom';
+
 import BookingForm from '../components/BookingForm';
 import usePlacesAutocomplete from '../hooks/usePlacesAutocomplete';
 import useDistanceCalculator from '../hooks/useDistanceCalculator';
@@ -12,11 +17,9 @@ const Home = () => {
   const [date, setDate] = useState('');
   const [returnDate, setReturnDate] = useState('');
   const [vehicleType, setVehicleType] = useState('sedan');
-
   const [distance, setDistance] = useState(null);
   const [duration, setDuration] = useState(null);
   const [cost, setCost] = useState(null);
-
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
@@ -25,9 +28,11 @@ const Home = () => {
   const destinationRef = useRef(null);
 
   const today = new Date().toISOString().split('T')[0];
-
   const [sourcePlaceId, setSourcePlaceId] = useState(null);
   const [destinationPlaceId, setDestinationPlaceId] = useState(null);
+
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   usePlacesAutocomplete(
     sourceRef,
@@ -50,6 +55,11 @@ const Home = () => {
   );
 
   const handleBooking = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
     if (!source || !destination || !date || !cost || !name || !phone) {
       setMessage('Please fill all required fields and wait for the estimate.');
       return;
@@ -73,6 +83,7 @@ const Home = () => {
         cost,
         duration,
         distance,
+        userId: user.uid,
       });
 
       setMessage('✅ Booking submitted successfully!');
@@ -89,8 +100,8 @@ const Home = () => {
       setCost(null);
       setPhone('');
       setName('');
-    } catch {
-      setMessage('❌ Error submitting booking. Please try again.');
+    } catch (err) {
+      setMessage(err.message || '❌ Error submitting booking.');
     }
   };
 
