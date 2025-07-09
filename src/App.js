@@ -20,27 +20,25 @@ import ManageUsers from './admin/ManageUsers';
 import AdminBookings from './admin/AdminBookings/AdminBookings';
 
 const LayoutWrapper = ({ children }) => {
-  const location = useLocation();
-  const path = location.pathname;
+  const { pathname } = useLocation();
 
-  // ❌ Hide layout on these pages
+  // ❌ Routes where Navbar and Footer should be hidden
   const hideLayoutRoutes = [
+    '/my-bookings',
+    '/login',
     '/admin',
     '/admin-login',
-    '/login',
-    '/my-bookings',
   ];
 
-  // Hide layout if the route matches or starts with '/admin/'
   const shouldHideLayout =
-    hideLayoutRoutes.includes(path) || path.startsWith('/admin/');
+    hideLayoutRoutes.includes(pathname) || pathname.startsWith('/admin/');
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       {!shouldHideLayout && <Navbar />}
-      {children}
+      <div className="flex-grow">{children}</div>
       {!shouldHideLayout && <Footer />}
-    </>
+    </div>
   );
 };
 
@@ -49,7 +47,7 @@ function App() {
     <Router>
       <LayoutWrapper>
         <Routes>
-          {/* Public Routes */}
+          {/* Public Pages */}
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
@@ -60,7 +58,7 @@ function App() {
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin-login" element={<AdminLogin />} />
 
-          {/* Admin Dashboard Pages */}
+          {/* Admin Dashboard */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/users" element={<ManageUsers />} />
           <Route path="/admin/bookings" element={<AdminBookings />} />

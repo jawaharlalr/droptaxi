@@ -60,12 +60,14 @@ const BookingForm = ({
     try {
       setSubmitting(true);
 
-      // 🔐 Ask user to log in with Google if not logged in
+      // 🔐 Ask to login if not already logged in
       if (!user) {
-        await loginWithGoogle(); // Uses signInWithPopup internally
+        await loginWithGoogle();
+        alert('Login successful. Please click "Confirm Booking" again.');
+        return; // 🛑 Let user click again after login
       }
 
-      await onSubmit(); // Submit booking
+      await onSubmit(); // ✅ Proceed with booking
       setIsBooked(true);
       setTimeout(() => setIsBooked(false), 3000);
     } catch (err) {

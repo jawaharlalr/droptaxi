@@ -82,17 +82,16 @@ const MyBookings = () => {
       />
 
       <div className="relative z-10 max-w-4xl p-4 mx-auto mt-10">
-        <div className="flex flex-col items-center justify-between mb-6 md:flex-row">
-          <h2 className="mb-4 text-3xl font-bold text-center text-white md:mb-0 md:text-left">
-            Your Bookings
-          </h2>
-          <Link
-            to="/"
-            className="px-4 py-2 text-white transition bg-black rounded hover:bg-gray-800"
-          >
-            Home
-          </Link>
-        </div>
+        <div className="relative flex items-center justify-center mb-6">
+  <h2 className="text-3xl font-bold text-center text-white">Your Bookings</h2>
+  <Link
+    to="/"
+    className="absolute right-0 px-4 py-2 text-black transition bg-white rounded hover:bg-white"
+  >
+    Home
+  </Link>
+</div>
+
 
         {/* Error message */}
         {error && <p className="text-center text-red-300">{error}</p>}

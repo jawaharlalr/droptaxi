@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FcGoogle } from 'react-icons/fc';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
 } from 'firebase/auth';
 import { auth, db } from '../utils/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
@@ -17,7 +16,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  // ✅ Handle Email/Password Login
+  // ✅ Email/Password Login
   const handleEmailLogin = async (e) => {
     e.preventDefault();
     try {
@@ -30,42 +29,35 @@ const LoginPage = () => {
     }
   };
 
-  // ✅ Google Login using Redirect
-  const handleGoogleLogin = () => {
-    const provider = new GoogleAuthProvider();
-    signInWithRedirect(auth, provider); // safer for COOP issues
+  // ✅ Google Popup Login
+  const handleGoogleLogin = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      const userRef = doc(db, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        await setDoc(userRef, {
+          name: user.displayName || '',
+          email: user.email,
+          role: 'user',
+          createdAt: new Date(),
+        });
+      }
+
+      console.log('Google login successful:', user.email);
+      navigate('/');
+    } catch (error) {
+      console.error('Google sign-in error:', error.message);
+      alert('Google login failed: ' + error.message);
+    }
   };
 
-  // ✅ Handle redirect result after login
-  useEffect(() => {
-    getRedirectResult(auth)
-      .then(async (result) => {
-        if (result?.user) {
-          const user = result.user;
-          const userRef = doc(db, 'users', user.uid);
-          const userSnap = await getDoc(userRef);
-
-          if (!userSnap.exists()) {
-            await setDoc(userRef, {
-              name: user.displayName || '',
-              email: user.email,
-              role: 'user',
-              createdAt: new Date(),
-            });
-          }
-
-          console.log('Google redirect login successful:', user.email);
-          navigate('/');
-        }
-      })
-      .catch((error) => {
-        console.error('Google Redirect Login Error:', error.message);
-        // Optional: alert('Google login failed: ' + error.message);
-      });
-  }, [navigate]);
-
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen px-4 bg-gray-100">
       <div className="w-full max-w-md p-8 bg-white shadow-xl rounded-2xl">
         <h2 className="mb-6 text-2xl font-bold text-center">Login to Pranav Drop Taxi</h2>
 

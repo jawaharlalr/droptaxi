@@ -26,11 +26,13 @@ export const generateInvoicePDF = (booking) => {
 
   // Header: Company
   doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
   doc.text('Pranav Drop Taxi', 105, 16, { align: 'center' });
 
   doc.setFontSize(12);
-  doc.text('GST No: 33XXXXXXXXXXZ5', 105, 22, { align: 'center' });
-  doc.text('Phone: +91 98765 43210', 105, 28, { align: 'center' });
+  doc.setFont('helvetica', 'normal');
+  doc.text('Phone: +91 98849 49171', 105, 22, { align: 'center' });
+  doc.text('GST No: 33XXXXXXXXXXZ5', 105, 28, { align: 'center' });
 
   // Left section
   doc.setFontSize(10);
@@ -51,6 +53,18 @@ export const generateInvoicePDF = (booking) => {
   // Table 1 – Trip Summary
   autoTable(doc, {
     startY: 62,
+    styles: {
+      halign: 'center',
+      textColor: [0, 0, 0],
+      fillColor: [255, 255, 255],
+      lineColor: [0, 0, 0],
+      lineWidth: 0.2,
+    },
+    headStyles: {
+      fillColor: [255, 255, 255],
+      textColor: [0, 0, 0],
+      fontStyle: 'bold',
+    },
     head: [['From', 'To', 'Distance (km)', 'Duration', 'Base + Driver Bata']],
     body: [
       [
@@ -58,7 +72,7 @@ export const generateInvoicePDF = (booking) => {
         booking.destination,
         `${distance} km`,
         durationText,
-        `Rs ${baseCost} + Rs ${driverBataPerDay} x ${noOfDays} = Rs ${driverBataTotal}`
+        `Rs. ${baseCost} + Rs. ${driverBataPerDay} x ${noOfDays} = Rs. ${driverBataTotal}`
       ],
     ],
   });
@@ -66,14 +80,26 @@ export const generateInvoicePDF = (booking) => {
   // Table 2 – Additional Charges
   autoTable(doc, {
     startY: doc.lastAutoTable.finalY + 5,
+    styles: {
+      halign: 'center',
+      textColor: [0, 0, 0],
+      fillColor: [255, 255, 255],
+      lineColor: [0, 0, 0],
+      lineWidth: 0.2,
+    },
+    headStyles: {
+      fillColor: [255, 255, 255],
+      textColor: [0, 0, 0],
+      fontStyle: 'bold',
+    },
     head: [['Toll', 'Parking', 'Hill', 'Permit', 'Total']],
     body: [
       [
-        `Rs ${toll}`,
-        `Rs ${parking}`,
-        `Rs ${hill}`,
-        `Rs ${permit}`,
-        `Rs ${totalSecond}`
+        `Rs. ${toll}`,
+        `Rs. ${parking}`,
+        `Rs. ${hill}`,
+        `Rs. ${permit}`,
+        `Rs. ${totalSecond}`
       ],
     ],
   });
@@ -81,8 +107,8 @@ export const generateInvoicePDF = (booking) => {
   // Summary
   doc.setFontSize(12);
   const ySummary = doc.lastAutoTable.finalY + 10;
-  doc.text(`Grand Total: Rs ${total}`, 14, ySummary);
-  doc.text(`Paid: Rs ${total}`, 14, ySummary + 6);
+  doc.text(`Grand Total: Rs. ${total}`, 14, ySummary);
+  doc.text(`Paid: Rs. ${total}`, 14, ySummary + 6);
 
   // Thank You
   doc.setFontSize(14);

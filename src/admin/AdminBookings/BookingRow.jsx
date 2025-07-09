@@ -3,11 +3,8 @@ import BookingExpand from './BookingExpand';
 import { updateDoc, doc } from 'firebase/firestore';
 import { db } from '../../utils/firebase';
 import { generateInvoicePDF } from '../../utils/pdfGenerator';
+import { FiChevronDown, FiChevronUp, FiTrash2, FiFileText } from 'react-icons/fi';
 
-/**
- * BookingRow – one row in AdminBookings table
- * Displays booking meta, status selector, cost, and actions
- */
 const BookingRow = ({
   booking: b,
   editValues,
@@ -17,7 +14,6 @@ const BookingRow = ({
   fetchBookings,
   handleDelete,
 }) => {
-  /** ――― Helpers ――― */
   const toNum = (n) => (+n ? +n : 0);
   const formatDate = (d) => {
     if (!d) return '-';
@@ -37,7 +33,6 @@ const BookingRow = ({
     return diff > 0 ? diff + 1 : 1;
   };
 
-  /** ――― Derived values ――― */
   const isExpanded = expandedId === b.id;
   const v = editValues[b.id] || {};
   const totalCost = toNum(v.cost) + toNum(v.toll) + toNum(v.parking) + toNum(v.hill) + toNum(v.permit);
@@ -45,17 +40,21 @@ const BookingRow = ({
   const noOfDays = getNoOfDays(b.date, b.returnDate);
   const DRIVER_BATA_PER_DAY = 400;
 
-  /** ――― Actions ――― */
   const updateStatus = async (status) => {
     try {
       await updateDoc(doc(db, 'bookings', b.id), { status });
       fetchBookings();
-    } catch {
+
+      const msg = `Hi ${b.name},\nYour Booking ID: ${b.bookingId || b.id} is ${status}.\nThank You!`;
+      const phoneWithCountryCode = `91${b.phone}`;
+      const waURL = `https://wa.me/${phoneWithCountryCode}?text=${encodeURIComponent(msg)}`;
+      window.open(waURL, '_blank');
+    } catch (err) {
+      console.error('Failed to update status:', err);
       alert('Failed to update status.');
     }
   };
 
-  /** ――― Render ――― */
   return (
     <>
       <tr className="border-b hover:bg-gray-50">
@@ -102,22 +101,24 @@ const BookingRow = ({
         <td className="px-3 py-2 space-y-1">
           <button
             onClick={() => setExpandedId(isExpanded ? null : b.id)}
-            className="block text-xs text-blue-600 underline"
+            className="flex items-center justify-center w-full gap-1 px-2 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700"
           >
-            {isExpanded ? 'Collapse' : 'Expand'}
+            {isExpanded ? <FiChevronUp /> : <FiChevronDown />} {isExpanded ? 'Collapse' : 'Expand'}
           </button>
+
           <button
             onClick={() => handleDelete(b.id)}
-            className="block text-xs text-red-600 underline"
+            className="flex items-center justify-center w-full gap-1 px-2 py-1 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700"
           >
-            Delete
+            <FiTrash2 /> Delete
           </button>
+
           {b.status === 'completed' && (
             <button
               onClick={() => generateInvoicePDF(b)}
-              className="block text-xs text-green-600 underline"
+              className="flex items-center justify-center w-full gap-1 px-2 py-1 text-xs font-medium text-white bg-green-600 rounded hover:bg-green-700"
             >
-              Create Invoice
+              <FiFileText /> Create Invoice
             </button>
           )}
         </td>

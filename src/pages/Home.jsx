@@ -1,8 +1,7 @@
-// src/pages/Home.jsx
-
 import React, { useState, useRef } from 'react';
 import { useAuth } from '../utils/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { FaWhatsapp, FaPhoneAlt } from 'react-icons/fa';
 
 import BookingForm from '../components/BookingForm';
 import usePlacesAutocomplete from '../hooks/usePlacesAutocomplete';
@@ -140,6 +139,27 @@ const Home = () => {
             onSubmit={handleBooking}
           />
         </div>
+      </div>
+
+      {/* Floating Buttons */}
+      <div className="fixed z-50 flex flex-col items-end space-y-3 bottom-6 right-2">
+        {/* WhatsApp (always visible) */}
+        <a
+          href="https://wa.me/919884609789"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="p-3 text-white bg-green-600 rounded-full shadow-lg hover:bg-green-700"
+        >
+          <FaWhatsapp size={20} />
+        </a>
+
+        {/* Call (only on desktop & tablet) */}
+        <a
+          href="tel:9884609789"
+          className="items-center justify-center hidden p-3 text-white bg-blue-600 rounded-full shadow-lg hover:bg-blue-700 sm:flex"
+        >
+          <FaPhoneAlt size={18} />
+        </a>
       </div>
     </div>
   );

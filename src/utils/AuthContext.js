@@ -39,7 +39,6 @@ export const AuthProvider = ({ children }) => {
           const data = userSnap.data();
           setIsAdmin(data.role === 'admin');
         } else {
-          // First-time user: create new doc
           await setDoc(userRef, {
             name: currentUser.displayName || '',
             email: currentUser.email || '',
@@ -49,7 +48,7 @@ export const AuthProvider = ({ children }) => {
           setIsAdmin(false);
         }
       } catch (err) {
-        console.error('Error fetching/creating user:', err);
+        console.error('Error fetching or creating user:', err);
         setIsAdmin(false);
       }
 
@@ -59,19 +58,49 @@ export const AuthProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  // 🔐 Google login
+  // ✅ Google login with popup
   const loginWithGoogle = async () => {
+    const provider = new GoogleAuthProvider();
+
     try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      return result.user;
+      await signInWithPopup(auth, provider);
+
+      // Wait for onAuthStateChanged to finish
+      return new Promise((resolve) => {
+        const unsub = onAuthStateChanged(auth, (currentUser) => {
+          if (currentUser) {
+            unsub();
+            resolve(currentUser);
+          }
+        });
+      });
     } catch (error) {
-      console.error('Google sign-in error:', error);
+      console.error('Google sign-in error:', error.message);
       throw error;
     }
   };
 
-  const logout = () => signOut(auth);
+  // ✅ Logout and wait for auth state to reflect
+  const logout = async () => {
+    try {
+      await signOut(auth);
+
+      // Wait for user to be set to null by onAuthStateChanged
+      return new Promise((resolve) => {
+        const unsub = onAuthStateChanged(auth, (currentUser) => {
+          if (!currentUser) {
+            setUser(null);
+            setIsAdmin(false);
+            unsub();
+            resolve();
+          }
+        });
+      });
+    } catch (error) {
+      console.error('Logout error:', error.message);
+      throw error;
+    }
+  };
 
   return (
     <AuthContext.Provider value={{ user, isAdmin, loading, loginWithGoogle, logout }}>

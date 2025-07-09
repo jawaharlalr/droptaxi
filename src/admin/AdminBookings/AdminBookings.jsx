@@ -3,6 +3,7 @@ import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../../utils/firebase';
 import { useAuth } from '../../utils/AuthContext';
 import BookingRow from './BookingRow';
+import { Link } from 'react-router-dom';
 
 const AdminBookings = () => {
   const { user, isAdmin, loading: authLoading } = useAuth();
@@ -13,7 +14,6 @@ const AdminBookings = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // 🔄 Fetch bookings
   const fetchBookings = async () => {
     setLoading(true);
     try {
@@ -49,7 +49,7 @@ const AdminBookings = () => {
     if (window.confirm('Delete this booking permanently?')) {
       try {
         await deleteDoc(doc(db, 'bookings', id));
-        fetchBookings(); // 🔄 Refresh
+        fetchBookings();
       } catch {
         alert('Failed to delete booking.');
       }
@@ -57,8 +57,9 @@ const AdminBookings = () => {
   };
 
   useEffect(() => {
-    if (!authLoading && user && isAdmin) fetchBookings();
-    else if (!authLoading) {
+    if (!authLoading && user && isAdmin) {
+      fetchBookings();
+    } else if (!authLoading) {
       setError('Access denied. Admins only.');
       setLoading(false);
     }
@@ -66,7 +67,6 @@ const AdminBookings = () => {
 
   if (authLoading) return <p className="mt-10 text-center">Checking access…</p>;
 
-  // ✅ Filter bookings based on status
   const filteredBookings =
     statusFilter === 'all'
       ? bookings
@@ -78,7 +78,6 @@ const AdminBookings = () => {
           return status === statusFilter;
         });
 
-  // 🎛️ Filter dropdown options
   const statusOptions = [
     { label: 'All', value: 'all' },
     { label: 'Pending (New)', value: 'pending' },
@@ -88,11 +87,20 @@ const AdminBookings = () => {
   ];
 
   return (
-    <div className="p-6 mx-auto max-w-7xl">
-      <div className="flex flex-col items-center justify-between gap-4 mb-6 sm:flex-row">
-        <h2 className="text-3xl font-bold">Manage Bookings</h2>
+    <div className="min-h-screen p-6 mx-auto text-black bg-white max-w-7xl">
+      <div className="flex flex-col items-start justify-between gap-4 mb-6 sm:flex-row sm:items-center">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
+          <h2 className="text-3xl font-bold">Manage Bookings</h2>
+          <Link
+            to="/admin/dashboard"
+            className="inline-block px-4 py-2 mt-2 text-sm font-medium text-black transition bg-white border border-black rounded sm:mt-0 hover:bg-black hover:text-white"
+          >
+            Dashboard
+          </Link>
+        </div>
+
         <select
-          className="p-2 text-sm border rounded"
+          className="p-2 text-sm border border-gray-300 rounded"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
         >
