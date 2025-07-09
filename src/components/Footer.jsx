@@ -12,7 +12,7 @@ const Footer = () => {
           <p>Reliable and affordable outstation taxi service.</p>
           <p className="mt-4 text-gray-400">
             © {new Date().getFullYear()}{' '}
-            <Link to="/admin-login" className="hover:underline">
+            <Link to="/admin-login">
               Pranav
             </Link>{' '}
             Drop Taxi. All rights reserved.
@@ -23,10 +23,11 @@ const Footer = () => {
         <div>
           <h4 className="mb-3 text-lg font-bold">Quick Links</h4>
           <ul className="space-y-2">
-            <li><Link to="/" className="block hover:underline">Home</Link></li>
-            <li><Link to="/about" className="block hover:underline">About Us</Link></li>
-            <li><Link to="/contact" className="block hover:underline">Contact Us</Link></li>
-            <li><Link to="/my-bookings" className="block hover:underline">My Bookings</Link></li>
+            <li><Link to="/" className="block transition-transform duration-200 hover:scale-105">Home</Link></li>
+            <li><Link to="/about" className="block transition-transform duration-200 hover:scale-105">About Us</Link></li>
+            <li><Link to="/contact" className="block transition-transform duration-200 hover:scale-105">Contact Us</Link></li>
+            <li><Link to="/my-bookings" className="block transition-transform duration-200 hover:scale-105">My Bookings</Link></li>
+
           </ul>
         </div>
 

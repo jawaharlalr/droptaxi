@@ -2,7 +2,6 @@ import React from 'react';
 import BookingExpand from './BookingExpand';
 import { updateDoc, doc } from 'firebase/firestore';
 import { db } from '../../utils/firebase';
-import { sendWhatsAppUpdate } from '../../utils/whatsappUtils';
 import { generateInvoicePDF } from '../../utils/pdfGenerator';
 
 /**
@@ -22,7 +21,6 @@ const BookingRow = ({
   const toNum = (n) => (+n ? +n : 0);
   const formatDate = (d) => {
     if (!d) return '-';
-    // Support Firestore Timestamp as well as ISO/string/Date
     const dateObj = d?.toDate?.() || new Date(d);
     return isNaN(dateObj.getTime())
       ? '-'
@@ -43,17 +41,14 @@ const BookingRow = ({
   const isExpanded = expandedId === b.id;
   const v = editValues[b.id] || {};
   const totalCost = toNum(v.cost) + toNum(v.toll) + toNum(v.parking) + toNum(v.hill) + toNum(v.permit);
-
   const isRoundTrip = !!b.returnDate;
   const noOfDays = getNoOfDays(b.date, b.returnDate);
   const DRIVER_BATA_PER_DAY = 400;
-  
 
   /** ――― Actions ――― */
   const updateStatus = async (status) => {
     try {
       await updateDoc(doc(db, 'bookings', b.id), { status });
-      await sendWhatsAppUpdate(b, status);
       fetchBookings();
     } catch {
       alert('Failed to update status.');
@@ -64,26 +59,21 @@ const BookingRow = ({
   return (
     <>
       <tr className="border-b hover:bg-gray-50">
-        {/* S.No */}
         <td className="px-3 py-2">{b.index}</td>
 
-        {/* Customer */}
         <td className="px-3 py-2">
           <div className="text-sm font-medium">{b.name}</div>
           {b.bookingId && <div className="text-xs text-gray-500">ID: {b.bookingId}</div>}
         </td>
 
-        {/* Phone */}
         <td className="px-3 py-2">{b.phone}</td>
 
-        {/* Route */}
         <td className="px-3 py-2">
           <div>{b.source}</div>
           <div className="text-xs text-center text-gray-500">to</div>
           <div>{b.destination}</div>
         </td>
 
-        {/* Dates & Trip Info */}
         <td className="px-3 py-2 text-xs leading-5">
           <div><b>Booked:</b> {formatDate(b.createdAt)}</div>
           <div><b>Type:</b> {isRoundTrip ? 'Round Trip' : 'One Way'}</div>
@@ -92,10 +82,8 @@ const BookingRow = ({
           <div><b>Bata:</b> Rs {DRIVER_BATA_PER_DAY} × {noOfDays} day{noOfDays > 1 ? 's' : ''}</div>
         </td>
 
-        {/* Vehicle */}
         <td className="px-3 py-2">{b.vehicleType}</td>
 
-        {/* Status */}
         <td className="px-3 py-2">
           <select
             value={b.status || ''}
@@ -109,10 +97,8 @@ const BookingRow = ({
           </select>
         </td>
 
-        {/* Cost */}
         <td className="px-3 py-2 font-semibold text-blue-700">Rs {b.totalCost || totalCost}</td>
 
-        {/* Actions */}
         <td className="px-3 py-2 space-y-1">
           <button
             onClick={() => setExpandedId(isExpanded ? null : b.id)}
@@ -137,7 +123,6 @@ const BookingRow = ({
         </td>
       </tr>
 
-      {/* Expanded Cost Editor Row */}
       {isExpanded && (
         <BookingExpand
           b={b}

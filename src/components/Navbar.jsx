@@ -6,16 +6,20 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <nav className="px-4 py-3 text-white bg-black shadow-md">
+    <nav className="px-6 py-0 text-white bg-black shadow-md">
       <div className="container flex items-center justify-between mx-auto">
-        {/* Logo */}
-        <Link to="/" className="text-xl font-bold">
-          Pranav Drop Taxi
-        </Link>
+  {/* Logo */}
+  <Link to="/" className="text-xl font-bold">
+    <img
+      src="/header.jpg"
+      alt="Logo"
+      className="object-contain transition-transform duration-300 h-28 hover:scale-110"
+    />
+  </Link>
 
-        {/* Desktop Links */}
-        <div className="items-center hidden gap-6 md:flex">
-          <Link to="/my-bookings" className="hover:underline">My Bookings</Link>
+  {/* Desktop Links */}
+  <div className="items-center hidden gap-6 md:flex">
+    <Link to="/my-bookings" className="hover:underline">My Bookings</Link>
           <Link to="/about" className="hover:underline">About Us</Link>
           <Link to="/contact" className="hover:underline">Contact Us</Link>
         </div>
