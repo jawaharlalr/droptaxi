@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { db } from '../utils/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
@@ -16,35 +16,31 @@ const MyBookings = () => {
   const [searched, setSearched] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
 
-  useEffect(() => {
-    const fetchBookings = async () => {
-      if (phone.length !== 10) {
-        setBookings([]);
-        setSearched(false);
-        return;
-      }
+  const handleSearch = async () => {
+    const cleanPhone = phone.replace(/\D/g, '').slice(0, 10);
+    if (cleanPhone.length !== 10) {
+      setBookings([]);
+      setSearched(true);
+      return;
+    }
 
-      setLoading(true);
-      try {
-        const q = query(collection(db, 'bookings'), where('phone', '==', phone));
-        const snapshot = await getDocs(q);
-        const results = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setBookings(results);
-        setSearched(true);
-      } catch (err) {
-        console.error('Error fetching bookings:', err);
-        setBookings([]);
-        setSearched(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBookings();
-  }, [phone]);
+    setLoading(true);
+    try {
+      const q = query(collection(db, 'bookings'), where('phone', '==', cleanPhone));
+      const snapshot = await getDocs(q);
+      const results = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setBookings(results);
+    } catch (err) {
+      console.error('Error fetching bookings:', err);
+      setBookings([]);
+    } finally {
+      setLoading(false);
+      setSearched(true);
+    }
+  };
 
   const toggleExpand = (id) => {
     setExpandedId(prev => (prev === id ? null : id));
@@ -94,25 +90,27 @@ const MyBookings = () => {
         </div>
 
         {/* Phone Input */}
-        <div className="w-full mx-auto mb-8 md:w-1/2">
+        <div className="flex flex-col items-center w-full gap-2 mx-auto mb-8 md:w-1/2">
           <input
             type="tel"
             placeholder="Enter your 10-digit phone number"
             value={phone}
-            onChange={(e) =>
-              setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))
-            }
+            onChange={(e) => setPhone(e.target.value)}
             className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-md focus:outline-none"
           />
+          <button
+            onClick={handleSearch}
+            className="w-full px-4 py-2 font-semibold text-white bg-blue-700 rounded hover:bg-blue-800"
+          >
+            Search Booking
+          </button>
         </div>
 
         {/* Results */}
         {loading ? (
           <p className="text-center text-gray-200">Loading...</p>
         ) : !searched ? (
-          <p className="text-center text-gray-200">
-            Enter your phone number to view bookings.
-          </p>
+          <p className="text-center text-gray-200">Enter your phone number to view bookings.</p>
         ) : bookings.length === 0 ? (
           <p className="text-center text-gray-200">No bookings found.</p>
         ) : (
