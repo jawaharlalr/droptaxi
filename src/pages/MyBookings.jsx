@@ -10,6 +10,13 @@ const vehicleLabels = {
   innova: 'Innova (7+1 Seater)',
 };
 
+const getDays = (start, end) => {
+  const s = new Date(start);
+  const e = end ? new Date(end) : s;
+  const diff = Math.ceil((e - s) / (1000 * 60 * 60 * 24));
+  return diff > 0 ? diff + 1 : 1;
+};
+
 const MyBookings = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -28,7 +35,6 @@ const MyBookings = () => {
       setLoading(true);
       setError('');
       try {
-        // ✅ Securely fetch bookings based on userId
         const q = query(collection(db, 'bookings'), where('userId', '==', user.uid));
         const snapshot = await getDocs(q);
         const results = snapshot.docs.map(doc => ({
@@ -83,20 +89,17 @@ const MyBookings = () => {
 
       <div className="relative z-10 max-w-4xl p-4 mx-auto mt-10">
         <div className="relative flex items-center justify-center mb-6">
-  <h2 className="text-3xl font-bold text-center text-white">Your Bookings</h2>
-  <Link
-    to="/"
-    className="absolute right-0 px-4 py-2 text-black transition bg-white rounded hover:bg-white"
-  >
-    Home
-  </Link>
-</div>
+          <h2 className="text-3xl font-bold text-center text-white">Your Bookings</h2>
+          <Link
+            to="/"
+            className="absolute right-0 px-4 py-2 text-black transition bg-white rounded hover:bg-white"
+          >
+            Home
+          </Link>
+        </div>
 
-
-        {/* Error message */}
         {error && <p className="text-center text-red-300">{error}</p>}
 
-        {/* Results */}
         {loading ? (
           <p className="text-center text-gray-200">Loading...</p>
         ) : bookings.length === 0 ? (
@@ -121,7 +124,6 @@ const MyBookings = () => {
                 parkingCharges,
                 hillCharges,
                 permitCharges,
-                totalCost,
               } = booking;
 
               const toll = toNum(tollCharges);
@@ -129,7 +131,11 @@ const MyBookings = () => {
               const hill = toNum(hillCharges);
               const permit = toNum(permitCharges);
               const base = toNum(cost);
-              const total = toNum(totalCost) || base + toll + parking + hill + permit;
+
+              const isRound = tripType === 'round';
+              const days = getDays(date, isRound ? returnDate : date);
+              const bata = days * 400;
+              const total = base + bata + toll + parking + hill + permit;
               const isExpanded = expandedId === id;
 
               return (
@@ -159,12 +165,17 @@ const MyBookings = () => {
                     </button>
                   </div>
 
+                  {/* Show total cost always */}
+                  <p className="mt-2 text-sm font-semibold text-blue-700">
+                    Total Cost: ₹{total}
+                  </p>
+
                   {isExpanded && (
                     <div className="grid grid-cols-1 gap-4 mt-4 text-sm md:grid-cols-2">
                       <div className="space-y-1">
-                        <p><strong>Trip Type:</strong> {tripType === 'round' ? 'Round Trip' : 'Single Trip'}</p>
+                        <p><strong>Trip Type:</strong> {isRound ? 'Round Trip' : 'Single Trip'}</p>
                         <p><strong>Date:</strong> {date || 'N/A'}</p>
-                        {tripType === 'round' && returnDate && (
+                        {isRound && returnDate && (
                           <p><strong>Return Date:</strong> {returnDate}</p>
                         )}
                         <p><strong>Vehicle:</strong> {vehicleLabels[vehicleType] || vehicleType}</p>
@@ -180,16 +191,13 @@ const MyBookings = () => {
 
                       <div className="space-y-1">
                         <p><strong>Base Fare:</strong> ₹{base}</p>
+                        <p><strong>Driver Bata:</strong> ₹400 × {days} day(s) = ₹{bata}</p>
                         {toll > 0 && <p><strong>Toll Charges:</strong> ₹{toll}</p>}
                         {parking > 0 && <p><strong>Parking Charges:</strong> ₹{parking}</p>}
                         {hill > 0 && <p><strong>Hill Charges:</strong> ₹{hill}</p>}
                         {permit > 0 && <p><strong>Permit Charges:</strong> ₹{permit}</p>}
 
-                        <p className="mt-2 text-base font-semibold text-blue-700">
-                          Total Cost: ₹{total}
-                        </p>
-
-                        <p className="mt-1 text-xs italic font-medium text-blue-700">
+                        <p className="mt-2 text-xs italic font-medium text-blue-700">
                           Final fare may vary based on actual trip.
                         </p>
                         <p className="text-xs italic font-semibold text-gray-600">

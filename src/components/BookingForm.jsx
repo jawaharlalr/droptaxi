@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import TripSummary from './TripSummary';
-import { useAuth } from '../utils/AuthContext'; // ✅
-import { FiLoader } from 'react-icons/fi'; // Spinner for loading
+import { useAuth } from '../utils/AuthContext';
+import { FiLoader } from 'react-icons/fi';
 
 const vehicleOptions = [
   {
@@ -39,8 +39,8 @@ const BookingForm = ({
   today, sourceRef, destinationRef,
 }) => {
   const [isBooked, setIsBooked] = useState(false);
-  const [submitting, setSubmitting] = useState(false); // ⏳
-  const { user, loginWithGoogle } = useAuth(); // ✅
+  const [submitting, setSubmitting] = useState(false);
+  const { user, loginWithGoogle } = useAuth(); 
 
   const isFormValid =
     source &&
@@ -60,14 +60,13 @@ const BookingForm = ({
     try {
       setSubmitting(true);
 
-      // 🔐 Ask to login if not already logged in
       if (!user) {
         await loginWithGoogle();
         alert('Login successful. Please click "Confirm Booking" again.');
-        return; // 🛑 Let user click again after login
+        return;
       }
 
-      await onSubmit(); // ✅ Proceed with booking
+      await onSubmit(); 
       setIsBooked(true);
       setTimeout(() => setIsBooked(false), 3000);
     } catch (err) {
@@ -82,7 +81,7 @@ const BookingForm = ({
     <div className="space-y-6 text-white">
       <h2 className="text-3xl font-bold">Plan Your Trip</h2>
 
-      {/* Trip Type Switch */}
+
       <div className="flex gap-4">
         {['single', 'round'].map((type) => (
           <motion.button
@@ -102,7 +101,7 @@ const BookingForm = ({
       </div>
 
       {/* Source & Destination */}
-      <label htmlFor="source" className="block text-sm">Source</label>
+      <label htmlFor="source" className="block text-sm">Pickup Location</label>
       <input
         id="source"
         type="text"
@@ -112,7 +111,7 @@ const BookingForm = ({
         className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
       />
 
-      <label htmlFor="destination" className="block mt-4 text-sm">Destination</label>
+      <label htmlFor="destination" className="block mt-4 text-sm">Drop Location</label>
       <input
         id="destination"
         type="text"
@@ -188,6 +187,7 @@ const BookingForm = ({
         value={name}
         onChange={(e) => setName(e.target.value)}
         className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
+        placeholder='Enter your name'
         autoComplete="name"
       />
 

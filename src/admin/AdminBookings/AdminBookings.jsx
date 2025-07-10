@@ -61,7 +61,7 @@ const AdminBookings = () => {
       }
     );
 
-    return () => unsubscribe(); // 🧹 Cleanup listener
+    return () => unsubscribe();
   }, [user, isAdmin, authLoading]);
 
   const handleDelete = async (id) => {
@@ -152,7 +152,7 @@ const AdminBookings = () => {
                   setEditValues={setEditValues}
                   expandedId={expandedId}
                   setExpandedId={setExpandedId}
-                  fetchBookings={null} // 
+                  fetchBookings={() => {}} // ✅ No-op function to prevent errors
                   handleDelete={handleDelete}
                 />
               ))}

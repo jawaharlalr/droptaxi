@@ -21,6 +21,7 @@ const BookingExpand = ({ b, v, editValues, setEditValues, fetchBookings }) => {
   };
 
   const saveCharges = async () => {
+    // Step 1: Update Firestore
     try {
       await updateDoc(doc(db, 'bookings', b.id), {
         distance: +v.distance,
@@ -32,9 +33,17 @@ const BookingExpand = ({ b, v, editValues, setEditValues, fetchBookings }) => {
         permitCharges: +v.permit,
         totalCost,
       });
-      fetchBookings();
-    } catch {
+    } catch (err) {
+      console.error('❌ Failed to update charges in Firestore:', err);
       alert('Failed to save charges.');
+      return;
+    }
+
+    // Step 2: Refresh UI safely
+    try {
+      fetchBookings();
+    } catch (err) {
+      console.error('⚠️ Failed to refresh bookings after saving:', err);
     }
   };
 

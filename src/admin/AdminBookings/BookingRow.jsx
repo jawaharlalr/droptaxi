@@ -26,6 +26,7 @@ const BookingRow = ({
           year: 'numeric',
         }).format(dateObj);
   };
+
   const getNoOfDays = (start, end) => {
     const s = new Date(start);
     const e = new Date(end || start);
@@ -41,17 +42,25 @@ const BookingRow = ({
   const DRIVER_BATA_PER_DAY = 400;
 
   const updateStatus = async (status) => {
+    // Step 1: Update Firestore
     try {
       await updateDoc(doc(db, 'bookings', b.id), { status });
       fetchBookings();
+    } catch (err) {
+      console.error('❌ Failed to update status in Firestore:', err);
+      alert('Failed to update status.');
+      return;
+    }
 
+    // Step 2: Try opening WhatsApp message (optional)
+    try {
       const msg = `Hi ${b.name},\nYour Booking ID: ${b.bookingId || b.id} is ${status}.\nThank You!`;
       const phoneWithCountryCode = `91${b.phone}`;
       const waURL = `https://wa.me/${phoneWithCountryCode}?text=${encodeURIComponent(msg)}`;
       window.open(waURL, '_blank');
     } catch (err) {
-      console.error('Failed to update status:', err);
-      alert('Failed to update status.');
+      console.error('⚠️ Failed to open WhatsApp:', err);
+      // Not alerting user here, since status update succeeded
     }
   };
 
