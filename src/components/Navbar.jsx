@@ -6,13 +6,17 @@ import { useAuth } from '../utils/AuthContext';
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const desktopDropdownRef = useRef(null);
+  const mobileDropdownRef = useRef(null);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (
+        (desktopDropdownRef.current && !desktopDropdownRef.current.contains(event.target)) &&
+        (mobileDropdownRef.current && !mobileDropdownRef.current.contains(event.target))
+      ) {
         setDropdownOpen(false);
       }
     };
@@ -24,9 +28,7 @@ const Navbar = () => {
     try {
       setDropdownOpen(false);
       await logout();
-      setTimeout(() => {
-        navigate('/');
-      }, 100);
+      setTimeout(() => navigate('/'), 100);
     } catch (err) {
       console.error('Logout error:', err);
     }
@@ -34,7 +36,7 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Sticky Mobile Top Info Bar */}
+      {/* Mobile Top Bar */}
       <div className="sticky top-0 z-[60] flex items-center justify-center h-10 px-4 text-sm font-medium text-black bg-white shadow-sm md:hidden">
         <a
           href="https://www.google.com/maps/place/28A,+Karmel+St,+opposite+V+Cure+Hospital,+Pallikaranai,+Chennai,+Tamil+Nadu+600100"
@@ -46,19 +48,15 @@ const Navbar = () => {
           Office Location
         </a>
         <span className="mx-2 text-gray-400">|</span>
-        <a
-          href="tel:+919884609789"
-          className="flex items-center gap-1 hover:text-red-600"
-        >
+        <a href="tel:+919884609789" className="flex items-center gap-1 hover:text-red-600">
           <FiPhone size={14} />
           +91 9884609789
         </a>
       </div>
 
-      {/* Sticky Main Navbar */}
+      {/* Main Navbar */}
       <nav className="sticky z-50 px-6 py-0 text-white bg-black shadow-md top-10 md:top-0">
         <div className="container flex items-center justify-between h-16 mx-auto md:h-[72px]">
-          {/* Logo */}
           <Link to="/" className="text-xl font-bold">
             <img
               src="/header.png"
@@ -67,20 +65,14 @@ const Navbar = () => {
             />
           </Link>
 
-          {/* Desktop Nav Links */}
+          {/* Desktop Menu */}
           <div className="items-center hidden gap-6 md:flex">
-            <Link to="/my-bookings" className="transition-transform duration-200 hover:scale-105">
-              My Bookings
-            </Link>
-            <Link to="/about" className="transition-transform duration-200 hover:scale-105">
-              About Us
-            </Link>
-            <Link to="/contact" className="transition-transform duration-200 hover:scale-105">
-              Contact Us
-            </Link>
+            <Link to="/my-bookings" className="transition-transform duration-200 hover:scale-105">My Bookings</Link>
+            <Link to="/about" className="transition-transform duration-200 hover:scale-105">About Us</Link>
+            <Link to="/contact" className="transition-transform duration-200 hover:scale-105">Contact Us</Link>
 
             {user && (
-              <div className="relative" ref={dropdownRef}>
+              <div className="relative" ref={desktopDropdownRef}>
                 <img
                   src={user.photoURL || 'https://www.gravatar.com/avatar/?d=mp&s=100'}
                   alt="Profile"
@@ -90,10 +82,7 @@ const Navbar = () => {
                 {dropdownOpen && (
                   <div className="absolute right-0 mt-2 bg-white border rounded shadow text-black min-w-[180px] z-10">
                     <div className="px-4 py-2 text-sm border-b">{user.email}</div>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
-                    >
+                    <button onClick={handleLogout} className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100">
                       Logout
                     </button>
                   </div>
@@ -102,17 +91,12 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile Nav Section */}
+          {/* Mobile Header Right Side */}
           <div className="flex items-center gap-3 md:hidden">
-            <Link
-              to="/my-bookings"
-              className="text-sm font-medium transition-transform duration-200 hover:scale-105"
-            >
-              My Bookings
-            </Link>
+            <Link to="/my-bookings" className="text-sm font-medium hover:scale-105">My Bookings</Link>
 
             {user && (
-              <div className="relative" ref={dropdownRef}>
+              <div className="relative" ref={mobileDropdownRef}>
                 <img
                   src={user.photoURL || 'https://www.gravatar.com/avatar/?d=mp&s=100'}
                   alt="Profile"
@@ -122,10 +106,7 @@ const Navbar = () => {
                 {dropdownOpen && (
                   <div className="absolute right-0 mt-2 bg-white border rounded shadow text-black min-w-[180px] z-10">
                     <div className="px-4 py-2 text-sm border-b">{user.email}</div>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
-                    >
+                    <button onClick={handleLogout} className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100">
                       Logout
                     </button>
                   </div>
@@ -139,7 +120,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile Menu Dropdown */}
+        {/* Mobile Menu Links */}
         {menuOpen && (
           <div className="flex flex-col gap-4 p-4 text-white bg-black md:hidden">
             <Link to="/about" onClick={() => setMenuOpen(false)}>About Us</Link>

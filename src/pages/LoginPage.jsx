@@ -1,22 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FcGoogle } from 'react-icons/fc';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
-import {
-  signInWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithPopup,
-} from 'firebase/auth';
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth, db } from '../utils/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../utils/AuthContext';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
 
-  // ✅ Email/Password Login
+  useEffect(() => {
+    if (!loading && user) {
+      navigate('/');
+    }
+  }, [user, loading, navigate]);
+
   const handleEmailLogin = async (e) => {
     e.preventDefault();
     try {
@@ -29,7 +32,6 @@ const LoginPage = () => {
     }
   };
 
-  // ✅ Google Popup Login
   const handleGoogleLogin = async () => {
     try {
       const provider = new GoogleAuthProvider();
@@ -56,6 +58,8 @@ const LoginPage = () => {
     }
   };
 
+  if (loading) return null;
+
   return (
     <div className="flex items-center justify-center min-h-screen px-4 bg-gray-100">
       <div className="w-full max-w-md p-8 bg-white shadow-xl rounded-2xl">
@@ -63,8 +67,9 @@ const LoginPage = () => {
 
         <form onSubmit={handleEmailLogin} className="space-y-4">
           <div>
-            <label className="block mb-1 font-medium">Email</label>
+            <label htmlFor="email" className="block mb-1 font-medium">Email</label>
             <input
+              id="email"
               type="email"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={email}
@@ -74,9 +79,10 @@ const LoginPage = () => {
           </div>
 
           <div>
-            <label className="block mb-1 font-medium">Password</label>
+            <label htmlFor="password" className="block mb-1 font-medium">Password</label>
             <div className="relative">
               <input
+                id="password"
                 type={showPassword ? 'text' : 'password'}
                 className="w-full px-4 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={password}

@@ -3,7 +3,8 @@ import { auth, db } from './firebase';
 import {
   onAuthStateChanged,
   signOut,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider,
 } from 'firebase/auth';
 import {
@@ -20,6 +21,23 @@ export const AuthProvider = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Check Google redirect login result
+  useEffect(() => {
+    const checkRedirect = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result?.user) {
+          setUser(result.user);
+        }
+      } catch (err) {
+        console.error('Redirect login error:', err);
+      }
+    };
+
+    checkRedirect();
+  }, []);
+
+  // Set user and admin info
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (!currentUser) {
@@ -36,8 +54,7 @@ export const AuthProvider = ({ children }) => {
         const userSnap = await getDoc(userRef);
 
         if (userSnap.exists()) {
-          const data = userSnap.data();
-          setIsAdmin(data.role === 'admin');
+          setIsAdmin(userSnap.data().role === 'admin');
         } else {
           await setDoc(userRef, {
             name: currentUser.displayName || '',
@@ -48,7 +65,7 @@ export const AuthProvider = ({ children }) => {
           setIsAdmin(false);
         }
       } catch (err) {
-        console.error('Error fetching or creating user:', err);
+        console.error('Error reading user data:', err);
         setIsAdmin(false);
       }
 
@@ -58,47 +75,21 @@ export const AuthProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  // ✅ Google login with popup
+  // ✅ Google login using redirect
   const loginWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
-
-    try {
-      await signInWithPopup(auth, provider);
-
-      // Wait for onAuthStateChanged to finish
-      return new Promise((resolve) => {
-        const unsub = onAuthStateChanged(auth, (currentUser) => {
-          if (currentUser) {
-            unsub();
-            resolve(currentUser);
-          }
-        });
-      });
-    } catch (error) {
-      console.error('Google sign-in error:', error.message);
-      throw error;
-    }
+    await signInWithRedirect(auth, provider);
   };
 
-  // ✅ Logout and wait for auth state to reflect
+  // ✅ Logout
   const logout = async () => {
     try {
       await signOut(auth);
-
-      // Wait for user to be set to null by onAuthStateChanged
-      return new Promise((resolve) => {
-        const unsub = onAuthStateChanged(auth, (currentUser) => {
-          if (!currentUser) {
-            setUser(null);
-            setIsAdmin(false);
-            unsub();
-            resolve();
-          }
-        });
-      });
-    } catch (error) {
-      console.error('Logout error:', error.message);
-      throw error;
+      setUser(null);
+      setIsAdmin(false);
+    } catch (err) {
+      console.error('Logout error:', err.message);
+      throw err;
     }
   };
 

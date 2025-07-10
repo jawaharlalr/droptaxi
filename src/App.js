@@ -19,10 +19,12 @@ import AdminLogin from './admin/AdminLogin';
 import ManageUsers from './admin/ManageUsers';
 import AdminBookings from './admin/AdminBookings/AdminBookings';
 
+import { AuthProvider } from './utils/AuthContext'; // ✅ Import global Auth context
+
+// ✅ This wrapper ensures we show/hide layout components like Navbar/Footer
 const LayoutWrapper = ({ children }) => {
   const { pathname } = useLocation();
 
-  // ❌ Routes where Navbar and Footer should be hidden
   const hideLayoutRoutes = [
     '/my-bookings',
     '/login',
@@ -42,29 +44,30 @@ const LayoutWrapper = ({ children }) => {
   );
 };
 
+// ✅ Main App with AuthProvider wrapped
 function App() {
   return (
-    <Router>
-      <LayoutWrapper>
-        <Routes>
-          {/* Public Pages */}
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/my-bookings" element={<MyBookings />} />
-          <Route path="/login" element={<LoginPage />} />
+    <AuthProvider>
+      <Router>
+        <LayoutWrapper>
+          <Routes>
+            {/* Public Pages */}
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/my-bookings" element={<MyBookings />} />
+            <Route path="/login" element={<LoginPage />} />
 
-          {/* Admin Login */}
-          <Route path="/admin" element={<AdminLogin />} />
-          <Route path="/admin-login" element={<AdminLogin />} />
-
-          {/* Admin Dashboard */}
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/users" element={<ManageUsers />} />
-          <Route path="/admin/bookings" element={<AdminBookings />} />
-        </Routes>
-      </LayoutWrapper>
-    </Router>
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminLogin />} />
+            <Route path="/admin-login" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/users" element={<ManageUsers />} />
+            <Route path="/admin/bookings" element={<AdminBookings />} />
+          </Routes>
+        </LayoutWrapper>
+      </Router>
+    </AuthProvider>
   );
 }
 
