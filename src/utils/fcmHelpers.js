@@ -1,4 +1,4 @@
-import { messaging, getToken, db } from './firebase'; // ensure db is exported from firebase.js
+import { messaging, getToken, db } from './firebase';
 import { doc, setDoc } from 'firebase/firestore';
 
 /**
@@ -12,14 +12,19 @@ export const requestAdminNotificationPermission = async (uid) => {
     });
 
     if (token) {
-      console.log('✅ Admin token:', token);
+      console.log('✅ Admin token obtained:', token);
 
-      // Save to Firestore under admin_tokens/{uid}
-      await setDoc(doc(db, 'admin_tokens', uid), { token });
+      // 🔐 Save token under `admin_tokens/{uid}`
+      await setDoc(doc(db, 'admin_tokens', uid), {
+        token,
+        updatedAt: new Date().toISOString(),
+      });
+
+      console.log(`📦 Token stored for admin UID: ${uid}`);
     } else {
-      console.warn('🔒 Notification permission not granted');
+      console.warn('🔒 Notification permission not granted or dismissed by user.');
     }
   } catch (err) {
-    console.error('❌ Error getting token:', err);
+    console.error('❌ Error getting token or storing it in Firestore:', err);
   }
 };
