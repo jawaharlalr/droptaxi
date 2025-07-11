@@ -141,11 +141,11 @@ const MyBookings = () => {
               return (
                 <li
                   key={id}
-                  className="p-4 border border-gray-300 rounded-lg shadow bg-white/80 backdrop-blur-md"
+                  className="p-4 border-black rounded-lg shadow border- bg-white/80 backdrop-blur-md"
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3">
-                      <span className="font-semibold text-gray-500">{index + 1}.</span>
+                      <span className="font-semibold text-black">{index + 1}.</span>
                       <h3 className="text-lg font-semibold break-all">
                         Booking ID: {bookingId || id}
                       </h3>
@@ -154,20 +154,21 @@ const MyBookings = () => {
                   </div>
 
                   <div className="flex items-center justify-between mt-1">
-                    <p className="text-sm text-gray-700">
-                      <strong>From:</strong> {source} → <strong>To:</strong> {destination}
+                    <p className="text-sm text-black">
+                      <strong>From:</strong> {source} 🡺 <strong>To:</strong> {destination}
                     </p>
                     <button
                       onClick={() => toggleExpand(id)}
-                      className="text-sm text-blue-600 hover:underline"
+                      className="text-sm text-blue-600"
                     >
-                      {isExpanded ? 'Collapse ▲' : 'Expand ▼'}
+                      {isExpanded ? 'Collapse' : 'Expand'}
                     </button>
                   </div>
 
                   {/* Show total cost always */}
-                  <p className="mt-2 text-sm font-semibold text-blue-700">
+                  <p className="mt-2 text-sm font-semibold text-green-600">
                     Total Cost: ₹{total}
+                    <span className="italic text-gray-500">(May vary)</span>
                   </p>
 
                   {isExpanded && (
@@ -190,7 +191,8 @@ const MyBookings = () => {
                       </div>
 
                       <div className="space-y-1">
-                        <p><strong>Base Fare:</strong> ₹{base}</p>
+                        <p><strong>Base Fare:</strong> ₹{base}
+                          <span className="italic text-gray-500">(May vary)</span></p>
                         <p><strong>Driver Bata:</strong> ₹400 × {days} day(s) = ₹{bata}</p>
                         {toll > 0 && <p><strong>Toll Charges:</strong> ₹{toll}</p>}
                         {parking > 0 && <p><strong>Parking Charges:</strong> ₹{parking}</p>}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import TripSummary from './TripSummary';
 import { useAuth } from '../utils/AuthContext';
@@ -40,7 +40,10 @@ const BookingForm = ({
 }) => {
   const [isBooked, setIsBooked] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const { user, loginWithGoogle } = useAuth(); 
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginCompleted, setLoginCompleted] = useState(false);
+  const { user, loginWithGoogle } = useAuth();
+  const confirmButtonRef = useRef(null);
 
   const isFormValid =
     source &&
@@ -60,15 +63,24 @@ const BookingForm = ({
     try {
       setSubmitting(true);
 
-      if (!user) {
+      if (!user && !loginCompleted) {
         await loginWithGoogle();
-        alert('Login successful. Please click "Confirm Booking" again.');
+        setLoginCompleted(true);
+        setShowLoginModal(true);
         return;
       }
 
-      await onSubmit(); 
+      await onSubmit();
       setIsBooked(true);
-      setTimeout(() => setIsBooked(false), 3000);
+
+      const phoneNumber = "9884609789";
+      const whatsappMessage = encodeURIComponent(
+        `Hello Pranav Drop Taxi, I have booked a taxi.\nName: ${name}\nPhone: +91 ${phone}`
+      );
+      window.open(`https://wa.me/${phoneNumber}?text=${whatsappMessage}`, '_blank');
+
+      // Scroll back to Confirm button
+      confirmButtonRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } catch (err) {
       console.error('Booking failed:', err.message);
       alert('Booking failed: ' + err.message);
@@ -81,7 +93,34 @@ const BookingForm = ({
     <div className="space-y-6 text-white">
       <h2 className="text-3xl font-bold">Plan Your Trip</h2>
 
+      {/* Name & Phone */}
+      <label htmlFor="name" className="block text-sm">Your Name</label>
+      <input
+        id="name"
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
+        placeholder='Enter your name'
+        autoComplete="name"
+      />
 
+      <label htmlFor="phone" className="block mt-4 text-sm">Mobile Number</label>
+      <input
+        id="phone"
+        type="tel"
+        autoComplete="tel"
+        value={phone}
+        onChange={(e) => {
+          const val = e.target.value;
+          if (/^\d{0,10}$/.test(val)) setPhone(val);
+        }}
+        className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
+        placeholder="10-digit Mobile Number"
+      />
+
+      {/* Trip Type */}
+      <label htmlFor="source" className="block text-sm">Trip Type</label>
       <div className="flex gap-4">
         {['single', 'round'].map((type) => (
           <motion.button
@@ -109,6 +148,7 @@ const BookingForm = ({
         ref={sourceRef}
         onChange={(e) => setSource(e.target.value)}
         className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
+        placeholder='Enter your pickup location'
       />
 
       <label htmlFor="destination" className="block mt-4 text-sm">Drop Location</label>
@@ -119,9 +159,10 @@ const BookingForm = ({
         ref={destinationRef}
         onChange={(e) => setDestination(e.target.value)}
         className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
+        placeholder='Enter your drop location'
       />
 
-      {/* Date & Return Date */}
+      {/* Dates */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
           <label htmlFor="date" className="block text-sm">Date</label>
@@ -160,7 +201,7 @@ const BookingForm = ({
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => setVehicleType(v.type)}
-              className={`flex-1 px-2 py-3 rounded-lg text-xs sm:text-sm font-medium border text-center transition ${
+              className={`flex-1 px-2 py-3 rounded-lg text-xs sm:text-sm font-bold border text-center transition ${
                 vehicleType === v.type
                   ? 'bg-white text-black border-white'
                   : 'border-white text-white hover:bg-white/10'
@@ -170,7 +211,7 @@ const BookingForm = ({
                 <img src={v.icon} alt={v.type} className="h-8 mb-2" />
                 <span>{v.label}</span>
                 <span className="font-normal">₹{v.rate[tripType]}/Km</span>
-                <span className="text-[11px] mt-1 block">
+                <span className="text-[15px] mt-1 block">
                   Min {tripType === 'single' ? '250' : '150'} Km
                 </span>
               </div>
@@ -179,33 +220,7 @@ const BookingForm = ({
         </div>
       </div>
 
-      {/* Name & Phone */}
-      <label htmlFor="name" className="block text-sm">Your Name</label>
-      <input
-        id="name"
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
-        placeholder='Enter your name'
-        autoComplete="name"
-      />
-
-      <label htmlFor="phone" className="block mt-4 text-sm">Mobile Number</label>
-      <input
-        id="phone"
-        type="tel"
-        autoComplete="tel"
-        value={phone}
-        onChange={(e) => {
-          const val = e.target.value;
-          if (/^\d{0,10}$/.test(val)) setPhone(val);
-        }}
-        className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
-        placeholder="10-digit Mobile Number"
-      />
-
-      {/* Summary */}
+      {/* Trip Summary */}
       <AnimatePresence>
         {isFormValid && (
           <motion.div
@@ -236,10 +251,11 @@ const BookingForm = ({
             transition={{ duration: 0.5 }}
             className="py-3 font-semibold text-center text-white bg-green-600 rounded-xl"
           >
-            ✅ Booking Confirmed!
+            Booking Confirmed
           </motion.div>
         ) : (
           <button
+            ref={confirmButtonRef}
             onClick={handleSubmit}
             disabled={!isFormValid || submitting}
             className={`w-full px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition ${
@@ -254,8 +270,38 @@ const BookingForm = ({
         )}
       </div>
 
-      {/* Validation Message */}
-      {message && <p className="mt-2 text-sm text-yellow-300">{message}</p>}
+      {/* Login Modal */}
+      <AnimatePresence>
+        {showLoginModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="w-full max-w-sm p-6 text-center bg-white shadow-xl rounded-xl"
+            >
+              <h3 className="mb-4 text-xl font-bold text-gray-800">Login Successful</h3>
+              <p className="mb-6 text-gray-600">Please confirm your booking.</p>
+              <button
+                onClick={() => {
+                  setShowLoginModal(false);
+                  handleSubmit(); // retry submit
+                }}
+                className="w-full px-4 py-2 font-semibold text-white transition bg-green-500 hover:bg-green-600 rounded-xl"
+              >
+                Confirm Booking
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 };
