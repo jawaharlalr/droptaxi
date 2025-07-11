@@ -79,7 +79,7 @@ const submitBooking = async (bookingData) => {
       ...(tripType === 'round' && { returnDate, returnDistance }),
     };
 
-    // 🔐 Use setDoc with known ID to match security rules
+    // 🔐 Save booking to Firestore
     await setDoc(doc(db, 'bookings', bookingId), newBooking);
 
     return { success: true };

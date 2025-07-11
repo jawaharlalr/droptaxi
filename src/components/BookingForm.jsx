@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import TripSummary from './TripSummary';
 import { useAuth } from '../utils/AuthContext';
@@ -70,17 +70,11 @@ const BookingForm = ({
         return;
       }
 
-      await onSubmit();
+      await onSubmit(); // 🔥 Save booking to Firestore
       setIsBooked(true);
 
-      const phoneNumber = "9884609789";
-      const whatsappMessage = encodeURIComponent(
-        `Hello Pranav Drop Taxi, I have booked a taxi.\nName: ${name}\nPhone: +91 ${phone}`
-      );
-      window.open(`https://wa.me/${phoneNumber}?text=${whatsappMessage}`, '_blank');
-
-      // Scroll back to Confirm button
       confirmButtonRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
     } catch (err) {
       console.error('Booking failed:', err.message);
       alert('Booking failed: ' + err.message);
@@ -89,11 +83,17 @@ const BookingForm = ({
     }
   };
 
+  useEffect(() => {
+    if (isBooked) {
+      const timer = setTimeout(() => setIsBooked(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isBooked]);
+
   return (
     <div className="space-y-6 text-white">
       <h2 className="text-3xl font-bold">Plan Your Trip</h2>
 
-      {/* Name & Phone */}
       <label htmlFor="name" className="block text-sm">Your Name</label>
       <input
         id="name"
@@ -101,7 +101,7 @@ const BookingForm = ({
         value={name}
         onChange={(e) => setName(e.target.value)}
         className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
-        placeholder='Enter your name'
+        placeholder="Enter your name"
         autoComplete="name"
       />
 
@@ -109,7 +109,6 @@ const BookingForm = ({
       <input
         id="phone"
         type="tel"
-        autoComplete="tel"
         value={phone}
         onChange={(e) => {
           const val = e.target.value;
@@ -117,10 +116,10 @@ const BookingForm = ({
         }}
         className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
         placeholder="10-digit Mobile Number"
+        autoComplete="tel"
       />
 
-      {/* Trip Type */}
-      <label htmlFor="source" className="block text-sm">Trip Type</label>
+      <label htmlFor="tripType" className="block text-sm">Trip Type</label>
       <div className="flex gap-4">
         {['single', 'round'].map((type) => (
           <motion.button
@@ -139,30 +138,28 @@ const BookingForm = ({
         ))}
       </div>
 
-      {/* Source & Destination */}
       <label htmlFor="source" className="block text-sm">Pickup Location</label>
       <input
         id="source"
         type="text"
-        value={source}
         ref={sourceRef}
+        value={source}
         onChange={(e) => setSource(e.target.value)}
         className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
-        placeholder='Enter your pickup location'
+        placeholder="Enter your pickup location"
       />
 
       <label htmlFor="destination" className="block mt-4 text-sm">Drop Location</label>
       <input
         id="destination"
         type="text"
-        value={destination}
         ref={destinationRef}
+        value={destination}
         onChange={(e) => setDestination(e.target.value)}
         className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
-        placeholder='Enter your drop location'
+        placeholder="Enter your drop location"
       />
 
-      {/* Dates */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
           <label htmlFor="date" className="block text-sm">Date</label>
@@ -191,7 +188,6 @@ const BookingForm = ({
         )}
       </div>
 
-      {/* Vehicle Selection */}
       <div>
         <span className="block mb-2 text-sm">Select Vehicle</span>
         <div className="flex justify-between gap-2">
@@ -220,7 +216,6 @@ const BookingForm = ({
         </div>
       </div>
 
-      {/* Trip Summary */}
       <AnimatePresence>
         {isFormValid && (
           <motion.div
@@ -240,7 +235,6 @@ const BookingForm = ({
         )}
       </AnimatePresence>
 
-      {/* Confirm Button */}
       <div>
         {isBooked ? (
           <motion.div
@@ -251,7 +245,7 @@ const BookingForm = ({
             transition={{ duration: 0.5 }}
             className="py-3 font-semibold text-center text-white bg-green-600 rounded-xl"
           >
-            Booking Confirmed
+            ✅ Booking Confirmed!
           </motion.div>
         ) : (
           <button
@@ -270,7 +264,6 @@ const BookingForm = ({
         )}
       </div>
 
-      {/* Login Modal */}
       <AnimatePresence>
         {showLoginModal && (
           <motion.div
@@ -291,7 +284,7 @@ const BookingForm = ({
               <button
                 onClick={() => {
                   setShowLoginModal(false);
-                  handleSubmit(); // retry submit
+                  handleSubmit(); // retry
                 }}
                 className="w-full px-4 py-2 font-semibold text-white transition bg-green-500 hover:bg-green-600 rounded-xl"
               >
@@ -301,7 +294,6 @@ const BookingForm = ({
           </motion.div>
         )}
       </AnimatePresence>
-
     </div>
   );
 };

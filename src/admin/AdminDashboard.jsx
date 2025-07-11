@@ -9,6 +9,7 @@ import {
   FiList,
   FiTrendingUp,
 } from 'react-icons/fi';
+import { requestAdminNotificationPermission } from '../utils/fcmHelpers'; // ✅ Add this
 
 const AdminDashboard = () => {
   const { user, isAdmin, loading: authLoading } = useAuth();
@@ -21,6 +22,14 @@ const AdminDashboard = () => {
     cancelled: 0,
   });
 
+  // ✅ Request push permission if admin
+  useEffect(() => {
+    if (user?.uid && isAdmin) {
+      requestAdminNotificationPermission(user.uid);
+    }
+  }, [user, isAdmin]);
+
+  // Fetch booking stats
   useEffect(() => {
     const fetchData = async () => {
       if (!user || !isAdmin) {
