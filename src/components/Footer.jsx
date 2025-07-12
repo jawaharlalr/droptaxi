@@ -13,7 +13,7 @@ const Footer = () => {
           <p>Reliable and affordable outstation taxi service.</p>
           <p className="mt-4 text-gray-400">
             © {new Date().getFullYear()}{' '}
-            <Link to="/admin-login" className="hover:underline">
+            <Link to="/admin-login">
               Pranav
             </Link>{' '}
             Drop Taxi. All rights reserved.
@@ -35,7 +35,13 @@ const Footer = () => {
           <h4 className="mb-3 text-lg font-bold">Contact</h4>
           <div className="flex items-start gap-2 mb-2">
             <FiMail className="mt-1 text-white" />
-            <span>support@pranavtaxi.com</span>
+            <button
+  className="text-white hover:text-red-500"
+  onClick={() => window.open('https://mail.google.com/mail/u/0/#inbox', '_blank')}
+>
+  droptaxipravan@gmail.com
+</button>
+
           </div>
           <div className="flex items-center gap-2 mb-2">
             <FiPhone className="text-white" />

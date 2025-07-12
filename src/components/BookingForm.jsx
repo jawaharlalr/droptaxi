@@ -207,7 +207,7 @@ const BookingForm = ({
                 <img src={v.icon} alt={v.type} className="h-8 mb-2" />
                 <span>{v.label}</span>
                 <span className="font-normal">₹{v.rate[tripType]}/Km</span>
-                <span className="text-[15px] mt-1 block">
+                <span className="text-[12px] mt-1 block">
                   Min {tripType === 'single' ? '250' : '150'} Km
                 </span>
               </div>
