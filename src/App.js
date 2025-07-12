@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -19,8 +19,7 @@ import AdminLogin from './admin/AdminLogin';
 import ManageUsers from './admin/ManageUsers';
 import AdminBookings from './admin/AdminBookings/AdminBookings';
 
-import { AuthProvider, useAuth } from './utils/AuthContext';
-import { requestAdminNotificationPermission } from './utils/fcmHelpers'; // ✅ Import FCM helper
+import { AuthProvider } from './utils/AuthContext';
 
 // ✅ Layout wrapper to hide Navbar/Footer on certain pages
 const LayoutWrapper = ({ children }) => {
@@ -45,38 +44,11 @@ const LayoutWrapper = ({ children }) => {
   );
 };
 
-// ✅ Hook to register Service Worker + request token for admin
-const NotificationManager = () => {
-  const { user, isAdmin, loading } = useAuth();
-
-  useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker
-        .register('/firebase-messaging-sw.js')
-        .then((registration) => {
-          console.log('✅ Service Worker registered:', registration);
-        })
-        .catch((err) => {
-          console.error('❌ Service Worker registration failed:', err);
-        });
-    }
-  }, []);
-
-  useEffect(() => {
-    if (user?.uid && isAdmin && !loading) {
-      requestAdminNotificationPermission(user.uid);
-    }
-  }, [user, isAdmin, loading]);
-
-  return null; // nothing visible
-};
-
 // ✅ Main App Component
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <NotificationManager />
         <LayoutWrapper>
           <Routes>
             {/* Public Pages */}

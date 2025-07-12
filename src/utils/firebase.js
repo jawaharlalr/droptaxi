@@ -1,7 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import { getMessaging, onMessage, getToken } from 'firebase/messaging';
 
 // ✅ Firebase config
 const firebaseConfig = {
@@ -15,16 +14,7 @@ const firebaseConfig = {
 
 // ✅ Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// ✅ Initialize services
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ✅ Prevent crash in environments where window is not available
-let messaging;
-if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
-  messaging = getMessaging(app);
-}
-
-// ✅ Export all
-export { app, auth, db, messaging, onMessage, getToken };
+export { app, auth, db };

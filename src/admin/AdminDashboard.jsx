@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { db } from '../utils/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '../utils/AuthContext';
 import AdminSidebar from '../components/AdminSidebar';
 import {
@@ -9,7 +9,7 @@ import {
   FiList,
   FiTrendingUp,
 } from 'react-icons/fi';
-import { requestAdminNotificationPermission } from '../utils/fcmHelpers'; // ✅ Add this
+import toast, { Toaster } from 'react-hot-toast';
 
 const AdminDashboard = () => {
   const { user, isAdmin, loading: authLoading } = useAuth();
@@ -22,43 +22,39 @@ const AdminDashboard = () => {
     cancelled: 0,
   });
 
-  // ✅ Request push permission if admin
-  useEffect(() => {
-    if (user?.uid && isAdmin) {
-      requestAdminNotificationPermission(user.uid);
-    }
-  }, [user, isAdmin]);
+  const prevBookingCount = useRef(0);
+  const soundRef = useRef(null);
 
-  // Fetch booking stats
   useEffect(() => {
-    const fetchData = async () => {
-      if (!user || !isAdmin) {
-        setError('Access denied. Admins only.');
-        setLoading(false);
-        return;
+    if (!user || !isAdmin || authLoading) return;
+
+    const unsubscribe = onSnapshot(collection(db, 'bookings'), (snapshot) => {
+      const bookings = snapshot.docs.map(doc => doc.data());
+
+      const statsData = {
+        total: bookings.length,
+        confirmed: bookings.filter(b => b.status === 'confirmed').length,
+        completed: bookings.filter(b => b.status === 'completed').length,
+        cancelled: bookings.filter(b => b.status === 'cancelled').length,
+      };
+
+      setStats(statsData);
+      setLoading(false);
+
+      // ✅ Detect new booking
+      if (prevBookingCount.current && bookings.length > prevBookingCount.current) {
+        soundRef.current?.play();
+        toast.success('📦 New Booking Received!');
       }
 
-      try {
-        const snapshot = await getDocs(collection(db, 'bookings'));
-        const bookings = snapshot.docs.map(doc => doc.data());
+      prevBookingCount.current = bookings.length;
+    }, (error) => {
+      console.error('🔥 Real-time booking listener failed:', error);
+      setError('Failed to listen to bookings.');
+      setLoading(false);
+    });
 
-        const statsData = {
-          total: bookings.length,
-          confirmed: bookings.filter(b => b.status === 'confirmed').length,
-          completed: bookings.filter(b => b.status === 'completed').length,
-          cancelled: bookings.filter(b => b.status === 'cancelled').length,
-        };
-
-        setStats(statsData);
-      } catch (err) {
-        console.error('Error fetching bookings:', err);
-        setError('Failed to load data.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (!authLoading) fetchData();
+    return () => unsubscribe();
   }, [user, isAdmin, authLoading]);
 
   if (authLoading) return <p className="mt-10 text-center text-black">Checking access...</p>;
@@ -67,7 +63,11 @@ const AdminDashboard = () => {
     <div className="flex min-h-screen text-black bg-white">
       <AdminSidebar className="bg-white border-r border-black" />
       <main className="flex-1 p-6">
+        <Toaster position="top-center" reverseOrder={false} />
         <h1 className="mb-6 text-3xl font-bold">Welcome, Pranav Drop Taxi</h1>
+
+        {/* 🔊 Hidden audio for notification */}
+        <audio ref={soundRef} src="/notification.mp3" preload="auto" />
 
         {loading ? (
           <p>Loading...</p>

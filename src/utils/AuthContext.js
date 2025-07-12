@@ -58,14 +58,12 @@ export const AuthProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  // ✅ Google login with popup
   const loginWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
 
     try {
       await signInWithPopup(auth, provider);
 
-      // Wait for onAuthStateChanged to finish
       return new Promise((resolve) => {
         const unsub = onAuthStateChanged(auth, (currentUser) => {
           if (currentUser) {
@@ -80,12 +78,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ✅ Logout and wait for auth state to reflect
   const logout = async () => {
     try {
       await signOut(auth);
 
-      // Wait for user to be set to null by onAuthStateChanged
       return new Promise((resolve) => {
         const unsub = onAuthStateChanged(auth, (currentUser) => {
           if (!currentUser) {

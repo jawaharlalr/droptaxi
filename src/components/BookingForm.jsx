@@ -245,7 +245,7 @@ const BookingForm = ({
             transition={{ duration: 0.5 }}
             className="py-3 font-semibold text-center text-white bg-green-600 rounded-xl"
           >
-            ✅ Booking Confirmed!
+            Booking Confirmed!
           </motion.div>
         ) : (
           <button
