@@ -42,7 +42,7 @@ const AdminLogin = () => {
   return (
     <div className="flex items-center justify-center min-h-screen px-4 bg-gray-100">
       <div className="w-full max-w-md p-6 bg-white rounded shadow">
-        <h2 className="mb-6 text-2xl font-bold text-center">Admin Login</h2>
+        <h2 className="mb-6 text-2xl font-bold text-center">Pranav Drop Taxi - Admin Login</h2>
         <form onSubmit={handleLogin} className="space-y-4">
           <input
             type="email"
