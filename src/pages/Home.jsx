@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useAuth } from '../utils/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { FaWhatsapp, FaPhoneAlt } from 'react-icons/fa';
+import { motion } from 'framer-motion'; // ✅ Framer Motion
 
 import BookingForm from '../components/BookingForm';
 import usePlacesAutocomplete from '../hooks/usePlacesAutocomplete';
@@ -86,7 +87,6 @@ const Home = () => {
       });
 
       setMessage('✅ Booking submitted successfully!');
-
       setSource('');
       setDestination('');
       setSourcePlaceId(null);
@@ -106,11 +106,32 @@ const Home = () => {
 
   return (
     <div
-      className="min-h-screen bg-center bg-cover"
+      className="min-h-screen text-white bg-center bg-cover"
       style={{ backgroundImage: "url('taxi.jpg')" }}
     >
-      <div className="flex items-center justify-center min-h-screen p-6 bg-black/70">
-        <div className="w-full max-w-3xl p-8 text-white shadow-lg bg-white/10 backdrop-blur-sm rounded-xl">
+      <div className="flex flex-col items-center justify-center min-h-screen p-4 space-y-6 bg-black/70 sm:p-6">
+        {/* Hero Section */}
+        <motion.div
+          className="space-y-3 text-center"
+          initial={{ opacity: 0, y: -40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <h1 className="text-3xl font-bold sm:text-4xl drop-shadow-md">
+            Fast. Reliable. Affordable.
+          </h1>
+          <p className="max-w-md mx-auto text-sm text-gray-100 sm:text-base">
+            Book your outstation taxi with Pranav Drop Taxi. Transparent pricing and on-time pickup—always.
+          </p>
+        </motion.div>
+
+        {/* Booking Form */}
+        <motion.div
+          className="w-full max-w-3xl p-4 border shadow-2xl sm:p-6 bg-white/10 backdrop-blur-md rounded-xl border-white/20"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
           <BookingForm
             tripType={tripType}
             setTripType={setTripType}
@@ -138,29 +159,31 @@ const Home = () => {
             message={message}
             onSubmit={handleBooking}
           />
-        </div>
+        </motion.div>
       </div>
 
       {/* Floating Buttons */}
-      <div className="fixed z-50 flex flex-col items-end space-y-3 bottom-6 right-2">
-        {/* WhatsApp (always visible) */}
+      <motion.div
+        className="fixed z-50 flex flex-col items-end space-y-2 bottom-4 right-2"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.0, duration: 0.6 }}
+      >
         <a
           href="https://wa.me/919884609789"
           target="_blank"
           rel="noopener noreferrer"
-          className="p-3 text-white bg-green-600 rounded-full shadow-lg hover:bg-green-700"
+          className="p-3 text-white transition duration-300 transform bg-green-600 rounded-full shadow-lg hover:bg-green-700 hover:scale-105"
         >
           <FaWhatsapp size={20} />
         </a>
-
-        {/* Call (only on desktop & tablet) */}
         <a
           href="tel:9884609789"
-          className="items-center justify-center hidden p-3 text-white bg-blue-600 rounded-full shadow-lg hover:bg-blue-700 sm:flex"
+          className="items-center justify-center hidden p-3 text-white transition duration-300 transform bg-blue-600 rounded-full shadow-lg sm:flex hover:bg-blue-700 hover:scale-105"
         >
           <FaPhoneAlt size={18} />
         </a>
-      </div>
+      </motion.div>
     </div>
   );
 };

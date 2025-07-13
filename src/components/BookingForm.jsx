@@ -25,6 +25,11 @@ const vehicleOptions = [
   },
 ];
 
+const fadeInUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+};
+
 const BookingForm = ({
   tripType, setTripType,
   source, setSource,
@@ -70,7 +75,7 @@ const BookingForm = ({
         return;
       }
 
-      await onSubmit(); // 🔥 Save booking to Firestore
+      await onSubmit();
       setIsBooked(true);
 
       confirmButtonRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -91,76 +96,99 @@ const BookingForm = ({
   }, [isBooked]);
 
   return (
-    <div className="space-y-6 text-white">
-      <h2 className="text-3xl font-bold">Plan Your Trip</h2>
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={{
+        hidden: {},
+        visible: { transition: { staggerChildren: 0.08 } },
+      }}
+      className="space-y-6 text-white"
+    >
+      <motion.h2
+        variants={fadeInUp}
+        className="text-3xl font-bold"
+      >
+        Plan Your Trip
+      </motion.h2>
 
-      <label htmlFor="name" className="block text-sm">Your Name</label>
-      <input
-        id="name"
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
-        placeholder="Enter your name"
-        autoComplete="name"
-      />
+      <motion.div variants={fadeInUp}>
+        <label htmlFor="name" className="block text-sm">Your Name</label>
+        <input
+          id="name"
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full px-4 py-2 mt-1 text-black transition border border-white rounded bg-white/80 focus:outline-none focus:ring-2 focus:ring-green-400"
+          placeholder="Enter your name"
+          autoComplete="name"
+        />
+      </motion.div>
 
-      <label htmlFor="phone" className="block mt-4 text-sm">Mobile Number</label>
-      <input
-        id="phone"
-        type="tel"
-        value={phone}
-        onChange={(e) => {
-          const val = e.target.value;
-          if (/^\d{0,10}$/.test(val)) setPhone(val);
-        }}
-        className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
-        placeholder="10-digit Mobile Number"
-        autoComplete="tel"
-      />
+      <motion.div variants={fadeInUp}>
+        <label htmlFor="phone" className="block mt-4 text-sm">Mobile Number</label>
+        <input
+          id="phone"
+          type="tel"
+          value={phone}
+          onChange={(e) => {
+            const val = e.target.value;
+            if (/^\d{0,10}$/.test(val)) setPhone(val);
+          }}
+          className="w-full px-4 py-2 mt-1 text-black transition border border-white rounded bg-white/80 focus:outline-none focus:ring-2 focus:ring-green-400"
+          placeholder="10-digit Mobile Number"
+          autoComplete="tel"
+        />
+      </motion.div>
 
-      <label htmlFor="tripType" className="block text-sm">Trip Type</label>
-      <div className="flex gap-4">
-        {['single', 'round'].map((type) => (
-          <motion.button
-            key={type}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setTripType(type)}
-            className={`px-4 py-2 rounded-full font-medium border transition ${
-              tripType === type
-                ? 'bg-white text-black'
-                : 'border-white text-white hover:bg-white/20'
-            }`}
-          >
-            {type === 'single' ? 'Single Trip' : 'Round Trip'}
-          </motion.button>
-        ))}
-      </div>
+      <motion.div variants={fadeInUp}>
+        <label htmlFor="tripType" className="block text-sm">Trip Type</label>
+        <div className="flex gap-4 mt-2">
+          {['single', 'round'].map((type) => (
+            <motion.button
+              key={type}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setTripType(type)}
+              className={`px-4 py-2 rounded-full font-medium border transition duration-200 ease-in-out ${
+                tripType === type
+                  ? 'bg-white text-black'
+                  : 'border-white text-white hover:bg-white/20'
+              }`}
+            >
+              {type === 'single' ? 'Single Trip' : 'Round Trip'}
+            </motion.button>
+          ))}
+        </div>
+      </motion.div>
 
-      <label htmlFor="source" className="block text-sm">Pickup Location</label>
-      <input
-        id="source"
-        type="text"
-        ref={sourceRef}
-        value={source}
-        onChange={(e) => setSource(e.target.value)}
-        className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
-        placeholder="Enter your pickup location"
-      />
+      <motion.div variants={fadeInUp}>
+        <label htmlFor="source" className="block text-sm">Pickup Location</label>
+        <input
+          id="source"
+          type="text"
+          ref={sourceRef}
+          value={source}
+          onChange={(e) => setSource(e.target.value)}
+          className="w-full px-4 py-2 mt-1 text-black transition border border-white rounded bg-white/80 focus:outline-none focus:ring-2 focus:ring-green-400"
+          placeholder="Enter your pickup location"
+        />
+      </motion.div>
 
-      <label htmlFor="destination" className="block mt-4 text-sm">Drop Location</label>
-      <input
-        id="destination"
-        type="text"
-        ref={destinationRef}
-        value={destination}
-        onChange={(e) => setDestination(e.target.value)}
-        className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
-        placeholder="Enter your drop location"
-      />
+      <motion.div variants={fadeInUp}>
+        <label htmlFor="destination" className="block mt-4 text-sm">Drop Location</label>
+        <input
+          id="destination"
+          type="text"
+          ref={destinationRef}
+          value={destination}
+          onChange={(e) => setDestination(e.target.value)}
+          className="w-full px-4 py-2 mt-1 text-black transition border border-white rounded bg-white/80 focus:outline-none focus:ring-2 focus:ring-green-400"
+          placeholder="Enter your drop location"
+        />
+      </motion.div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <motion.div variants={fadeInUp} className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
           <label htmlFor="date" className="block text-sm">Date</label>
           <input
@@ -169,7 +197,7 @@ const BookingForm = ({
             min={today}
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
+            className="w-full px-4 py-2 mt-1 text-black transition border border-white rounded bg-white/80 focus:outline-none focus:ring-2 focus:ring-green-400"
           />
         </div>
 
@@ -182,19 +210,19 @@ const BookingForm = ({
               min={date}
               value={returnDate}
               onChange={(e) => setReturnDate(e.target.value)}
-              className="w-full px-4 py-2 mt-1 text-black border border-white rounded bg-white/80"
+              className="w-full px-4 py-2 mt-1 text-black transition border border-white rounded bg-white/80 focus:outline-none focus:ring-2 focus:ring-green-400"
             />
           </div>
         )}
-      </div>
+      </motion.div>
 
-      <div>
+      <motion.div variants={fadeInUp}>
         <span className="block mb-2 text-sm">Select Vehicle</span>
         <div className="flex justify-between gap-2">
           {vehicleOptions.map((v) => (
             <motion.button
               key={v.type}
-              whileHover={{ scale: 1.03 }}
+              whileHover={{ scale: 1.03, boxShadow: '0px 4px 12px rgba(255,255,255,0.3)' }}
               whileTap={{ scale: 0.97 }}
               onClick={() => setVehicleType(v.type)}
               className={`flex-1 px-2 py-3 rounded-lg text-xs sm:text-sm font-bold border text-center transition ${
@@ -214,16 +242,16 @@ const BookingForm = ({
             </motion.button>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       <AnimatePresence>
         {isFormValid && (
           <motion.div
             key="summary"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.4 }}
+            exit={{ opacity: 0, y: 40 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
           >
             <TripSummary
               distance={distance}
@@ -235,7 +263,7 @@ const BookingForm = ({
         )}
       </AnimatePresence>
 
-      <div>
+      <motion.div variants={fadeInUp}>
         {isBooked ? (
           <motion.div
             key="success"
@@ -248,21 +276,27 @@ const BookingForm = ({
             Booking Confirmed!
           </motion.div>
         ) : (
-          <button
-            ref={confirmButtonRef}
-            onClick={handleSubmit}
-            disabled={!isFormValid || submitting}
-            className={`w-full px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition ${
-              isFormValid && !submitting
-                ? 'bg-green-500 hover:bg-green-600 text-white'
-                : 'bg-gray-400 text-white cursor-not-allowed'
-            }`}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4 }}
           >
-            {submitting && <FiLoader className="animate-spin" />}
-            {submitting ? 'Processing…' : 'Confirm Booking'}
-          </button>
+            <button
+              ref={confirmButtonRef}
+              onClick={handleSubmit}
+              disabled={!isFormValid || submitting}
+              className={`w-full px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition duration-200 ease-in-out ${
+                isFormValid && !submitting
+                  ? 'bg-green-500 hover:bg-green-600 text-white'
+                  : 'bg-gray-400 text-white cursor-not-allowed'
+              }`}
+            >
+              {submitting && <FiLoader className="animate-spin" />}
+              {submitting ? 'Processing…' : 'Confirm Booking'}
+            </button>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
 
       <AnimatePresence>
         {showLoginModal && (
@@ -270,7 +304,7 @@ const BookingForm = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
@@ -284,7 +318,7 @@ const BookingForm = ({
               <button
                 onClick={() => {
                   setShowLoginModal(false);
-                  handleSubmit(); // retry
+                  handleSubmit();
                 }}
                 className="w-full px-4 py-2 font-semibold text-white transition bg-green-500 hover:bg-green-600 rounded-xl"
               >
@@ -294,7 +328,7 @@ const BookingForm = ({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 };
 
