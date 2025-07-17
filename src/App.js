@@ -4,6 +4,7 @@ import {
   Routes,
   Route,
   useLocation,
+  Outlet,
 } from 'react-router-dom';
 
 import Navbar from './components/Navbar';
@@ -20,6 +21,17 @@ import ManageUsers from './admin/ManageUsers';
 import AdminBookings from './admin/AdminBookings/AdminBookings';
 
 import { AuthProvider } from './utils/AuthContext';
+import AdminSidebar from './components/AdminSidebar';
+
+// ✅ Admin layout wrapper with sidebar
+const AdminLayout = () => (
+  <div className="flex min-h-screen text-black bg-white">
+    <AdminSidebar />
+    <main className="flex-1 p-4 bg-gray-50">
+      <Outlet />
+    </main>
+  </div>
+);
 
 // ✅ Layout wrapper to hide Navbar/Footer on certain pages
 const LayoutWrapper = ({ children }) => {
@@ -58,12 +70,18 @@ function App() {
             <Route path="/my-bookings" element={<MyBookings />} />
             <Route path="/login" element={<LoginPage />} />
 
-            {/* Admin Routes */}
+            {/* Admin Login */}
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/admin-login" element={<AdminLogin />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/users" element={<ManageUsers />} />
-            <Route path="/admin/bookings" element={<AdminBookings />} />
+
+            {/* Admin Panel Layout with nested routes */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="users" element={<ManageUsers />} />
+              <Route path="bookings" element={<AdminBookings />} />
+              {/* Optional: redirect /admin → /admin/dashboard */}
+              <Route index element={<AdminDashboard />} />
+            </Route>
           </Routes>
         </LayoutWrapper>
       </Router>

@@ -1,13 +1,15 @@
+// src/pages/AdminDashboard.jsx
 import React, { useEffect, useState, useRef } from 'react';
 import { db } from '../utils/firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '../utils/AuthContext';
-import AdminSidebar from '../components/AdminSidebar';
 import {
   FiCheckCircle,
   FiXCircle,
   FiList,
   FiTrendingUp,
+  FiArrowUpRight,
+  FiArrowDownRight,
 } from 'react-icons/fi';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -21,79 +23,115 @@ const AdminDashboard = () => {
     completed: 0,
     cancelled: 0,
   });
+  const [trend, setTrend] = useState(null); // up or down
 
   const prevBookingCount = useRef(0);
-  const soundRef = useRef(null);
+  const audioRef = useRef(null);
 
   useEffect(() => {
-    if (!user || !isAdmin || authLoading) return;
+    if (authLoading || !user || !isAdmin) return;
 
-    const unsubscribe = onSnapshot(collection(db, 'bookings'), (snapshot) => {
-      const bookings = snapshot.docs.map(doc => doc.data());
+    const bookingsRef = collection(db, 'bookings');
 
-      const statsData = {
-        total: bookings.length,
-        confirmed: bookings.filter(b => b.status === 'confirmed').length,
-        completed: bookings.filter(b => b.status === 'completed').length,
-        cancelled: bookings.filter(b => b.status === 'cancelled').length,
-      };
+    const unsubscribe = onSnapshot(
+      bookingsRef,
+      (snapshot) => {
+        const bookings = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
-      setStats(statsData);
-      setLoading(false);
+        const statsData = {
+          total: bookings.length,
+          confirmed: bookings.filter((b) => b.status === 'confirmed').length,
+          completed: bookings.filter((b) => b.status === 'completed').length,
+          cancelled: bookings.filter((b) => b.status === 'cancelled').length,
+        };
 
-      // ✅ Detect new booking
-      if (prevBookingCount.current && bookings.length > prevBookingCount.current) {
-        soundRef.current?.play();
-        toast.success('📦 New Booking Received!');
+        setStats(statsData);
+        setLoading(false);
+
+        if (prevBookingCount.current > 0) {
+          const diff = bookings.length - prevBookingCount.current;
+          if (diff > 0) {
+            setTrend('up');
+            toast.success('📦 New booking received');
+            if (audioRef.current) audioRef.current.play();
+          } else if (diff < 0) {
+            setTrend('down');
+          }
+        }
+
+        prevBookingCount.current = bookings.length;
+      },
+      (err) => {
+        console.error('❌ Firestore error:', err);
+        setError('Failed to fetch booking stats.');
+        setLoading(false);
       }
-
-      prevBookingCount.current = bookings.length;
-    }, (error) => {
-      console.error('🔥 Real-time booking listener failed:', error);
-      setError('Failed to listen to bookings.');
-      setLoading(false);
-    });
+    );
 
     return () => unsubscribe();
   }, [user, isAdmin, authLoading]);
 
-  if (authLoading) return <p className="mt-10 text-center text-black">Checking access...</p>;
+  if (authLoading) {
+    return <p className="mt-10 text-center text-black">Checking admin access...</p>;
+  }
 
   return (
-    <div className="flex min-h-screen text-black bg-white">
-      <AdminSidebar className="bg-white border-r border-black" />
-      <main className="flex-1 p-6">
-        <Toaster position="top-center" reverseOrder={false} />
-        <h1 className="mb-6 text-3xl font-bold">Welcome, Pranav Drop Taxi</h1>
+    <div className="p-6">
+      <Toaster />
+      <audio ref={audioRef} src="/notification.mp3" preload="auto" />
 
-        {/* 🔊 Hidden audio for notification */}
-        <audio ref={soundRef} src="/notification.mp3" preload="auto" />
+      <h1 className="mb-6 text-3xl font-bold">Pranav Drop Taxi Dashboard</h1>
 
-        {loading ? (
-          <p>Loading...</p>
-        ) : error ? (
-          <div className="p-4 text-red-700 bg-red-100 border border-red-400 rounded">{error}</div>
-        ) : (
+      {loading ? (
+        <p>Loading booking statistics...</p>
+      ) : error ? (
+        <div className="p-4 text-red-700 bg-red-100 border border-red-400 rounded">{error}</div>
+      ) : (
+        <>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            <StatCard label="Total Bookings" count={stats.total} icon={<FiList />} />
-            <StatCard label="Confirmed" count={stats.confirmed} icon={<FiCheckCircle />} />
-            <StatCard label="Completed" count={stats.completed} icon={<FiTrendingUp />} />
-            <StatCard label="Cancelled" count={stats.cancelled} icon={<FiXCircle />} />
+            <StatCard label="Total Bookings" count={stats.total} icon={<FiList />} color="gray" />
+            <StatCard label="Confirmed" count={stats.confirmed} icon={<FiCheckCircle />} color="green" />
+            <StatCard label="Completed" count={stats.completed} icon={<FiTrendingUp />} color="blue" />
+            <StatCard label="Cancelled" count={stats.cancelled} icon={<FiXCircle />} color="red" />
           </div>
-        )}
-      </main>
+
+          {trend && (
+            <div className="flex items-center mt-4 text-sm text-gray-600">
+              {trend === 'up' ? (
+                <span className="flex items-center gap-1 text-green-600">
+                  <FiArrowUpRight /> Bookings are increasing
+                </span>
+              ) : (
+                <span className="flex items-center gap-1 text-red-600">
+                  <FiArrowDownRight /> Bookings have decreased
+                </span>
+              )}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };
 
-const StatCard = ({ label, count, icon }) => (
-  <div className="p-4 bg-white border border-gray-300 rounded shadow">
-    <div className="flex items-center justify-between mb-2">
-      <span className="text-sm text-black">{label}</span>
-      <div className="text-xl text-black">{icon}</div>
+// 🎨 Stat card with color themes
+const StatCard = ({ label, count, icon, color }) => {
+  const colorMap = {
+    gray: 'border-gray-300',
+    green: 'border-green-400',
+    red: 'border-red-400',
+    blue: 'border-blue-400',
+  };
+
+  return (
+    <div className={`p-4 bg-white border rounded shadow ${colorMap[color] || 'border-gray-300'}`}>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm text-black">{label}</span>
+        <div className="text-xl text-black">{icon}</div>
+      </div>
+      <p className="text-2xl font-bold text-black">{count}</p>
     </div>
-    <p className="text-2xl font-bold text-black">{count}</p>
-  </div>
-);
+  );
+};
 
 export default AdminDashboard;

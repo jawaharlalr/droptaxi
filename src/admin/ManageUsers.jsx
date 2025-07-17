@@ -60,8 +60,69 @@ const ManageUsers = () => {
 
   if (authLoading) return <p className="mt-10 text-center">Checking access...</p>;
 
+  const admins = users.filter((u) => u.role === 'admin');
+  const regularUsers = users.filter((u) => u.role !== 'admin');
+
+  const renderUserTable = (title, userList, startIndex = 1) => (
+    <div className="mb-10">
+      <h3 className="mb-3 text-xl font-semibold text-gray-800">{title}</h3>
+      <div className="overflow-x-auto border rounded">
+        <table className="w-full text-sm text-left border-collapse">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-100 border-b border-gray-300">
+            <tr>
+              <th className="px-4 py-2">S.No.</th>
+              <th className="px-4 py-2">Name</th>
+              <th className="px-4 py-2">Email</th>
+              <th className="px-4 py-2">Role</th>
+              <th className="px-4 py-2 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {userList.map((u, index) => (
+              <tr key={u.id} className="border-b hover:bg-gray-50">
+                <td className="px-4 py-3">{startIndex + index}</td>
+                <td className="px-4 py-3">
+                  <input
+                    type="text"
+                    value={u.name || ''}
+                    onChange={(e) =>
+                      handleFieldChange(u.id, 'name', e.target.value)
+                    }
+                    className="w-full px-2 py-1 border border-gray-300 rounded"
+                    placeholder="Name"
+                  />
+                </td>
+                <td className="px-4 py-3 text-gray-600">{u.email}</td>
+                <td className="px-4 py-3">
+                  <select
+                    value={u.role || 'user'}
+                    onChange={(e) =>
+                      handleFieldChange(u.id, 'role', e.target.value)
+                    }
+                    className="w-full px-2 py-1 border border-gray-300 rounded"
+                  >
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </td>
+                <td className="px-4 py-3 text-center">
+                  <button
+                    onClick={() => handleDelete(u.id)}
+                    className="flex items-center justify-center gap-1 px-3 py-1 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700"
+                  >
+                    <FiTrash2 size={14} /> Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="max-w-5xl min-h-screen p-6 mx-auto text-black bg-white">
+    <div className="max-w-6xl min-h-screen p-6 mx-auto text-black bg-white">
       <div className="flex flex-col items-start justify-between gap-4 mb-6 sm:flex-row sm:items-center">
         <h2 className="text-3xl font-bold">Manage Users</h2>
         <Link
@@ -73,55 +134,16 @@ const ManageUsers = () => {
       </div>
 
       {loading ? (
-        <p>Loading users...</p>
+        <p className="text-center text-gray-600">Loading users...</p>
       ) : error ? (
-        <div className="p-4 text-red-700 bg-red-100 rounded">{error}</div>
+        <div className="p-4 text-red-700 bg-red-100 border border-red-200 rounded">{error}</div>
       ) : users.length === 0 ? (
-        <p>No users found.</p>
+        <p className="text-center text-gray-600">No users found.</p>
       ) : (
-        <ul className="space-y-4">
-          {users.map((u) => (
-            <li
-              key={u.id}
-              className="flex items-center justify-between p-4 bg-white border border-gray-300 rounded shadow-sm"
-            >
-              <div className="w-full space-y-2">
-                {/* Editable Name */}
-                <input
-                  type="text"
-                  value={u.name || ''}
-                  onChange={(e) =>
-                    handleFieldChange(u.id, 'name', e.target.value)
-                  }
-                  className="w-full px-3 py-2 text-black border border-gray-300 rounded"
-                  placeholder="Name"
-                />
-
-                {/* Email (readonly) */}
-                <p className="text-sm text-gray-600">{u.email}</p>
-
-                {/* Editable Role */}
-                <select
-                  value={u.role || 'user'}
-                  onChange={(e) =>
-                    handleFieldChange(u.id, 'role', e.target.value)
-                  }
-                  className="px-3 py-2 border border-gray-300 rounded"
-                >
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
-
-              <button
-                onClick={() => handleDelete(u.id)}
-                className="flex items-center gap-2 px-3 py-2 ml-4 text-sm font-medium text-white bg-red-600 rounded hover:bg-red-700"
-              >
-                <FiTrash2 size={16} /> Delete
-              </button>
-            </li>
-          ))}
-        </ul>
+        <>
+          {admins.length > 0 && renderUserTable('Admins', admins)}
+          {regularUsers.length > 0 && renderUserTable('Users', regularUsers)}
+        </>
       )}
     </div>
   );

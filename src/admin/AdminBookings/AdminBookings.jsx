@@ -4,11 +4,15 @@ import {
   onSnapshot,
   deleteDoc,
   doc,
+  setDoc,
 } from 'firebase/firestore';
+import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { db } from '../../utils/firebase';
 import { useAuth } from '../../utils/AuthContext';
 import BookingRow from './BookingRow';
 import { Link } from 'react-router-dom';
+
+const messaging = getMessaging(); // Firebase Messaging instance
 
 const AdminBookings = () => {
   const { user, isAdmin, loading: authLoading } = useAuth();
@@ -19,6 +23,47 @@ const AdminBookings = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // 🔔 Register FCM token on login
+  useEffect(() => {
+    if (authLoading || !user || !isAdmin) return;
+
+    const registerAdminToken = async () => {
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          console.warn('Notifications permission denied');
+          return;
+        }
+
+        const token = await getToken(messaging, {
+          vapidKey: 'BNOd40yGdGsvTGUAvw5Jx9iIch5lEW7m1eflUakxtmElGM9VqJVylHJymoJi8yjLwQCWM29yBsM8tFFa2SIcQ04',
+        });
+        console.log('FCM Token:', token);       
+        if (token) {
+          await setDoc(doc(db, 'admin_tokens', user.uid), { token }, { merge: true });
+          console.log('✅ Admin FCM token saved.');
+        }
+      } catch (err) {
+        console.error('Failed to get FCM token:', err);
+      }
+    };
+
+    registerAdminToken();
+  }, [user, isAdmin, authLoading]);
+
+  // 📩 Listen for foreground notifications
+  useEffect(() => {
+    onMessage(messaging, (payload) => {
+      console.log('📥 FCM Message received:', payload);
+      const { title, body } = payload.notification || {};
+
+      if (title && body) {
+        new Notification(title, { body });
+      }
+    });
+  }, []);
+
+  // 📦 Listen to bookings collection
   useEffect(() => {
     if (authLoading) return;
 

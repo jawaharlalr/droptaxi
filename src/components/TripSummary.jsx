@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import {
   Car,
   Timer,
-  Wallet,
   RefreshCw,
   UserCheck,
   BadgeIndianRupee,
@@ -46,23 +45,26 @@ const TripSummary = ({
 
       <ul className="space-y-3 text-sm">
         <li className="flex items-start gap-2">
-  <RefreshCw className="w-4 h-4 text-black" />
-  <span>
-    <span className="font-medium transition hover:text-gray-700">Trip Type:</span>{' '}
-    <strong className="capitalize">{tripType}</strong>
-    {tripType === 'round' && (
-      <span className="ml-1 text-xs italic text-gray-600">
-        (distance, time & cost shown for one-way)
-      </span>
-    )}
-  </span>
-</li>
-
+          <RefreshCw className="w-4 h-4 text-black" />
+          <span>
+            <span className="font-medium transition hover:text-gray-700">
+              Trip Type:
+            </span>{' '}
+            <strong className="capitalize">{tripType}</strong>
+            {tripType === 'round' && (
+              <span className="ml-1 text-xs italic text-gray-600">
+                (distance, time & cost shown for one-way)
+              </span>
+            )}
+          </span>
+        </li>
 
         <li className="flex items-start gap-2">
           <Car className="w-4 h-4 text-black" />
           <span>
-            <span className="font-medium transition hover:text-gray-700">Distance:</span>{' '}
+            <span className="font-medium transition hover:text-gray-700">
+              Distance:
+            </span>{' '}
             <strong>
               {distance} km
               {tripType === 'round' && returnDistance
@@ -76,7 +78,9 @@ const TripSummary = ({
         <li className="flex items-start gap-2">
           <Timer className="w-4 h-4 text-black" />
           <span>
-            <span className="font-medium transition hover:text-gray-700">Duration:</span>{' '}
+            <span className="font-medium transition hover:text-gray-700">
+              Duration:
+            </span>{' '}
             <strong>
               {hours > 0 ? `${hours}h ` : ''}
               {minutes}m
@@ -88,7 +92,9 @@ const TripSummary = ({
         <li className="flex items-start gap-2">
           <BadgeIndianRupee className="w-4 h-4 text-black" />
           <span>
-            <span className="font-medium transition hover:text-gray-700">Cost:</span>{' '}
+            <span className="font-medium transition hover:text-gray-700">
+              Cost:
+            </span>{' '}
             <strong>{formatRupees(cost)}</strong>{' '}
             <span className="text-xs italic text-gray-600">(may vary)</span>
           </span>
@@ -97,9 +103,13 @@ const TripSummary = ({
         <li className="flex items-start gap-2">
           <UserCheck className="w-4 h-4 text-black" />
           <span>
-            <span className="font-medium transition hover:text-gray-700">Driver Bata:</span>{' '}
+            <span className="font-medium transition hover:text-gray-700">
+              Driver Bata:
+            </span>{' '}
             <strong>₹400/day</strong>{' '}
-            <span className="text-xs italic text-gray-600">(not included in cost) (extra*)</span>
+            <span className="text-xs italic text-gray-600">
+              (not included in cost) (extra*)
+            </span>
           </span>
         </li>
       </ul>
