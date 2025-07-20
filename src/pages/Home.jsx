@@ -133,33 +133,33 @@ const Home = () => {
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           <BookingForm
-            tripType={tripType}
-            setTripType={setTripType}
-            date={date}
-            setDate={setDate}
-            returnDate={returnDate}
-            setReturnDate={setReturnDate}
-            today={today}
-            source={source}
-            setSource={setSource}
-            destination={destination}
-            setDestination={setDestination}
-            sourceRef={sourceRef}
-            destinationRef={destinationRef}
-            vehicleType={vehicleType}
-            setVehicleType={setVehicleType}
-            distance={distance}
-            duration={duration}
-            cost={cost}
-            name={name}
-            setName={setName}
-            phone={phone}
-            setPhone={setPhone}
-            isNameEditable={true}
-            message={message}
-            onSubmit={handleBooking}
-          />
-        </motion.div>
+    tripType={tripType}
+    setTripType={setTripType}
+    date={date}
+    setDate={setDate}
+    returnDate={returnDate}
+    setReturnDate={setReturnDate}
+    today={today}
+    source={source}
+    setSource={setSource}
+    destination={destination}
+    setDestination={setDestination}
+    sourceRef={sourceRef}
+    destinationRef={destinationRef}
+    vehicleType={vehicleType}
+    setVehicleType={setVehicleType}
+    distance={distance}
+    duration={duration}
+    cost={cost}
+    name={name}
+    setName={setName}
+    phone={phone}
+    setPhone={setPhone}
+    isNameEditable={true}
+    message={message}
+    onSubmit={handleBooking}
+  />
+</motion.div>
       </div>
 
       {/* Floating Buttons */}

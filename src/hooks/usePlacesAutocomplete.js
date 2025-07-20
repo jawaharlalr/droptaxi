@@ -1,8 +1,5 @@
-// src/hooks/usePlacesAutocomplete.js
 import { useEffect } from 'react';
 import loadGoogleMapsAPI from '../utils/loadGoogleMapsAPI';
-
-const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
 
 const usePlacesAutocomplete = (
   sourceRef,
@@ -13,60 +10,87 @@ const usePlacesAutocomplete = (
   setDestinationPlaceId
 ) => {
   useEffect(() => {
-    let sourceAutocomplete = null;
-    let destinationAutocomplete = null;
+    let sourceElement = null;
+    let destinationElement = null;
+
+    const sourceNode = sourceRef.current;
+    const destinationNode = destinationRef.current;
+
+    const sourceListener = async (event) => {
+      const place = event.placePrediction.toPlace();
+      await place.fetchFields({ fields: ['displayName', 'id'] });
+
+      const address = place.displayName?.text || '';
+      const placeId = place.id;
+
+      setSource(address);
+      setSourcePlaceId(placeId);
+    };
+
+    const destinationListener = async (event) => {
+      const place = event.placePrediction.toPlace();
+      await place.fetchFields({ fields: ['displayName', 'id'] });
+
+      const address = place.displayName?.text || '';
+      const placeId = place.id;
+
+      setDestination(address);
+      setDestinationPlaceId(placeId);
+    };
 
     const initAutocomplete = async () => {
       try {
-        const google = await loadGoogleMapsAPI(apiKey);
+        const google = await loadGoogleMapsAPI();
+        await google.maps.importLibrary('places');
 
-        if (!google?.maps?.places?.Autocomplete) {
-          console.error('❌ Autocomplete class not available. Is Places API enabled?');
-          return;
+        if (sourceNode) {
+          sourceElement = new google.maps.places.PlaceAutocompleteElement();
+          sourceElement.id = 'source-autocomplete';
+          sourceElement.className = 'w-full mb-4';
+          sourceElement.setAttribute(
+            'component-restrictions',
+            JSON.stringify({ country: ['IN'] })
+          );
+
+          sourceNode.innerHTML = '';
+          sourceNode.appendChild(sourceElement);
+          sourceElement.addEventListener('gmp-select', sourceListener);
         }
 
-        const options = {
-          fields: ['place_id', 'formatted_address'],
-          componentRestrictions: { country: 'in' },
-        };
+        if (destinationNode) {
+          destinationElement = new google.maps.places.PlaceAutocompleteElement();
+          destinationElement.id = 'destination-autocomplete';
+          destinationElement.className = 'w-full';
+          destinationElement.setAttribute(
+            'component-restrictions',
+            JSON.stringify({ country: ['IN'] })
+          );
 
-        if (sourceRef.current) {
-          sourceAutocomplete = new google.maps.places.Autocomplete(sourceRef.current, options);
-          sourceAutocomplete.addListener('place_changed', () => {
-            const place = sourceAutocomplete.getPlace();
-            if (place?.place_id && place?.formatted_address) {
-              setSource(place.formatted_address);
-              setSourcePlaceId(place.place_id);
-            }
-          });
-        }
-
-        if (destinationRef.current) {
-          destinationAutocomplete = new google.maps.places.Autocomplete(destinationRef.current, options);
-          destinationAutocomplete.addListener('place_changed', () => {
-            const place = destinationAutocomplete.getPlace();
-            if (place?.place_id && place?.formatted_address) {
-              setDestination(place.formatted_address);
-              setDestinationPlaceId(place.place_id);
-            }
-          });
+          destinationNode.innerHTML = '';
+          destinationNode.appendChild(destinationElement);
+          destinationElement.addEventListener('gmp-select', destinationListener);
         }
       } catch (err) {
-        console.error('❌ Failed to initialize Google Autocomplete:', err);
+        console.error('❌ Failed to initialize PlaceAutocompleteElement:', err);
       }
     };
 
-    if (sourceRef.current && destinationRef.current) {
-      initAutocomplete();
-    }
+    initAutocomplete();
 
     return () => {
-      if (window.google?.maps?.event) {
-        if (sourceAutocomplete) window.google.maps.event.clearInstanceListeners(sourceAutocomplete);
-        if (destinationAutocomplete) window.google.maps.event.clearInstanceListeners(destinationAutocomplete);
-      }
+      if (sourceElement) sourceElement.removeEventListener('gmp-select', sourceListener);
+      if (destinationElement) destinationElement.removeEventListener('gmp-select', destinationListener);
+      if (sourceNode) sourceNode.innerHTML = '';
+      if (destinationNode) destinationNode.innerHTML = '';
     };
-  }, [sourceRef, destinationRef, setSource, setSourcePlaceId, setDestination, setDestinationPlaceId]);
+  }, [
+    sourceRef,
+    destinationRef,
+    setSource,
+    setSourcePlaceId,
+    setDestination,
+    setDestinationPlaceId,
+  ]);
 };
 
 export default usePlacesAutocomplete;

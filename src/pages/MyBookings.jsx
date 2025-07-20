@@ -37,7 +37,7 @@ const MyBookings = () => {
       try {
         const q = query(collection(db, 'bookings'), where('userId', '==', user.uid));
         const snapshot = await getDocs(q);
-        const results = snapshot.docs.map(doc => ({
+        const results = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
@@ -54,7 +54,7 @@ const MyBookings = () => {
   }, [user, navigate]);
 
   const toggleExpand = (id) => {
-    setExpandedId(prev => (prev === id ? null : id));
+    setExpandedId((prev) => (prev === id ? null : id));
   };
 
   const toNum = (val) => (typeof val === 'number' ? val : parseFloat(val) || 0);
@@ -112,8 +112,8 @@ const MyBookings = () => {
                 bookingId,
                 status,
                 tripType,
-                source,
-                destination,
+                sourceRef,
+                destinationRef,
                 date,
                 returnDate,
                 vehicleType,
@@ -132,7 +132,8 @@ const MyBookings = () => {
               const permit = toNum(permitCharges);
               const base = toNum(cost);
 
-              const isRound = tripType === 'round';
+              const normalizedTripType = (tripType || '').toLowerCase();
+              const isRound = normalizedTripType === 'round';
               const days = getDays(date, isRound ? returnDate : date);
               const bata = days * 400;
               const total = base + bata + toll + parking + hill + permit;
@@ -155,7 +156,7 @@ const MyBookings = () => {
 
                   <div className="flex items-center justify-between mt-1">
                     <p className="text-sm text-black">
-                      <strong>From:</strong> {source} 🡺 <strong>To:</strong> {destination}
+                      <strong>From:</strong> {sourceRef} 🡺 <strong>To:</strong> {destinationRef}
                     </p>
                     <button
                       onClick={() => toggleExpand(id)}
@@ -167,33 +168,48 @@ const MyBookings = () => {
 
                   {/* Show total cost always */}
                   <p className="mt-2 text-sm font-semibold text-green-600">
-                    Total Cost: ₹{total}
+                    Total Cost: ₹{total}{' '}
                     <span className="italic text-gray-500">(May vary)</span>
                   </p>
 
                   {isExpanded && (
                     <div className="grid grid-cols-1 gap-4 mt-4 text-sm md:grid-cols-2">
                       <div className="space-y-1">
-                        <p><strong>Trip Type:</strong> {isRound ? 'Round Trip' : 'Single Trip'}</p>
+                        <p>
+                          <strong>Trip Type:</strong>{' '}
+                          {isRound ? 'Round Trip' : 'Single Trip'}
+                        </p>
                         <p><strong>Date:</strong> {date || 'N/A'}</p>
                         {isRound && returnDate && (
                           <p><strong>Return Date:</strong> {returnDate}</p>
                         )}
-                        <p><strong>Vehicle:</strong> {vehicleLabels[vehicleType] || vehicleType}</p>
+                        <p>
+                          <strong>Vehicle:</strong>{' '}
+                          {vehicleLabels[vehicleType] || vehicleType || 'N/A'}
+                        </p>
                         {distance && (
-                          <p><strong>Estimated Distance:</strong> {distance} km{' '}
-                            <span className="italic text-gray-500">(May vary)</span></p>
+                          <p>
+                            <strong>Estimated Distance:</strong> {distance} km{' '}
+                            <span className="italic text-gray-500">(May vary)</span>
+                          </p>
                         )}
                         {duration && (
-                          <p><strong>Estimated Duration:</strong> {formatDuration(duration)}{' '}
-                            <span className="italic text-gray-500">(May vary)</span></p>
+                          <p>
+                            <strong>Estimated Duration:</strong>{' '}
+                            {formatDuration(duration)}{' '}
+                            <span className="italic text-gray-500">(May vary)</span>
+                          </p>
                         )}
                       </div>
 
                       <div className="space-y-1">
-                        <p><strong>Base Fare:</strong> ₹{base}
-                          <span className="italic text-gray-500">(May vary)</span></p>
-                        <p><strong>Driver Bata:</strong> ₹400 × {days} day(s) = ₹{bata}</p>
+                        <p>
+                          <strong>Base Fare:</strong> ₹{base}{' '}
+                          <span className="italic text-gray-500">(May vary)</span>
+                        </p>
+                        <p>
+                          <strong>Driver Bata:</strong> ₹400 × {days} day(s) = ₹{bata}
+                        </p>
                         {toll > 0 && <p><strong>Toll Charges:</strong> ₹{toll}</p>}
                         {parking > 0 && <p><strong>Parking Charges:</strong> ₹{parking}</p>}
                         {hill > 0 && <p><strong>Hill Charges:</strong> ₹{hill}</p>}

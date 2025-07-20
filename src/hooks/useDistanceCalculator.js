@@ -13,58 +13,61 @@ const useDistanceCalculator = (
   setRoundTripCost
 ) => {
   useEffect(() => {
-    if (sourcePlaceId && destinationPlaceId && vehicleType) {
-      const service = new window.google.maps.DistanceMatrixService();
+    if (!sourcePlaceId || !destinationPlaceId || !vehicleType) return;
 
-      service.getDistanceMatrix(
-        {
-          origins: [{ placeId: sourcePlaceId }],
-          destinations: [{ placeId: destinationPlaceId }],
-          travelMode: window.google.maps.TravelMode.DRIVING,
-          unitSystem: window.google.maps.UnitSystem.METRIC,
-        },
-        (response, status) => {
-          if (status !== 'OK') {
-            setMessage('Google Maps error.');
-            return;
-          }
+    const service = new window.google.maps.DistanceMatrixService();
 
-          const result = response.rows[0].elements[0];
-          if (result.status !== 'OK') {
-            setMessage('Distance calculation failed.');
-            return;
-          }
-
-          const km = result.distance.value / 1000;
-          const mins = result.duration.value / 60;
-
-          const rates = {
-            sedan: { single: 14, round: 13 },
-            muv: { single: 18, round: 17 },
-            innova: { single: 19, round: 18 },
-          };
-
-          const rateObj = rates[vehicleType];
-          if (!rateObj) {
-            setMessage('Invalid vehicle type selected.');
-            return;
-          }
-
-          const singleTripCost = Math.round(km * rateObj.single);
-          const roundTripCost = Math.round(km * rateObj.round); // No driver bata
-
-          const finalCost = tripType === 'round' ? roundTripCost : singleTripCost;
-
-          setDistance(km.toFixed(2));
-          setDuration(Math.round(mins));
-          setCost(finalCost);
-          setMessage('');
-
-          if (setSingleTripCost) setSingleTripCost(singleTripCost);
-          if (setRoundTripCost) setRoundTripCost(roundTripCost);
+    service.getDistanceMatrix(
+      {
+        origins: [{ placeId: sourcePlaceId }],
+        destinations: [{ placeId: destinationPlaceId }],
+        travelMode: window.google.maps.TravelMode.DRIVING,
+        unitSystem: window.google.maps.UnitSystem.METRIC,
+      },
+      (response, status) => {
+        if (status !== 'OK') {
+          setMessage('Distance request failed. Please try again.');
+          console.error('Distance Matrix error:', status, response);
+          return;
         }
-      );
-    }
+
+        const result = response?.rows?.[0]?.elements?.[0];
+        if (!result || result.status !== 'OK') {
+          setMessage('Unable to calculate distance for this route.');
+          console.warn('Distance Matrix result:', result);
+          return;
+        }
+
+        const distanceInKm = result.distance.value / 1000;
+        const durationInMin = result.duration.value / 60;
+
+        const rates = {
+          sedan: { single: 14, round: 13 },
+          muv: { single: 18, round: 17 },
+          innova: { single: 19, round: 18 },
+        };
+
+        const rate = rates[vehicleType];
+        if (!rate) {
+          setMessage('Invalid vehicle type.');
+          return;
+        }
+
+        const singleCost = Math.round(distanceInKm * rate.single);
+        const roundCost = Math.round(distanceInKm * rate.round);
+        const cost = tripType === 'round' ? roundCost : singleCost;
+
+        // Set state with parsed numbers
+        setDistance(parseFloat(distanceInKm.toFixed(2))); // float for summary math
+        setDuration(Math.round(durationInMin));           // integer minutes
+        setCost(cost);
+        setMessage('');
+
+        // Optional setters
+        setSingleTripCost?.(singleCost);
+        setRoundTripCost?.(roundCost);
+      }
+    );
   }, [
     sourcePlaceId,
     destinationPlaceId,
