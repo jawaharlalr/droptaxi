@@ -9,20 +9,25 @@ import {
 import { db } from "./firebase";
 import { generateBookingId } from "../utils/generateBookingId";
 
-/**
- * Safely extracts and flattens place details from the Google Places API (New).
- * 
- * @param {Object} place - Place object returned from <gmpx-placeautocomplete>
- * @returns {Object} - Flattened and serializable place info
- */
 function extractPlaceDetails(place) {
+  const formattedAddress = place?.formattedAddress || '';
+  const displayName = place?.displayName || '';
+  const fullAddress = displayName && formattedAddress
+    ? `${displayName}, ${formattedAddress}`
+    : formattedAddress || displayName;
+
   return {
-    displayName: place.displayName || '',
-    formattedAddress: place.formattedAddress || '',
-    placeId: place.id || '',
+    formattedAddress,
+    displayName,
+    fullAddress,
+    placeId: place?.id || place?.placeId || '',
     location: {
-      lat: typeof place?.location?.lat === 'function' ? place.location.lat() : null,
-      lng: typeof place?.location?.lng === 'function' ? place.location.lng() : null,
+      lat: typeof place?.location?.lat === "function"
+        ? place.location.lat()
+        : place?.location?.lat ?? null,
+      lng: typeof place?.location?.lng === "function"
+        ? place.location.lng()
+        : place?.location?.lng ?? null,
     },
     addressComponents: place?.addressComponents || [],
     types: place?.types || [],
@@ -56,16 +61,16 @@ export default async function submitBooking(data) {
   const extractedDestination = extractPlaceDetails(destination);
 
   const {
-    displayName: sourceDisplayName,
+    fullAddress: sourceAddress,
     location: { lat: sourceLat, lng: sourceLng },
   } = extractedSource;
   const {
-    displayName: destinationDisplayName,
+    fullAddress: destinationAddress,
     location: { lat: destLat, lng: destLng },
   } = extractedDestination;
 
   if (
-    !sourceDisplayName || !destinationDisplayName ||
+    !sourceAddress || !destinationAddress ||
     typeof sourceLat !== "number" || typeof sourceLng !== "number" ||
     typeof destLat !== "number" || typeof destLng !== "number"
   ) {
@@ -76,8 +81,8 @@ export default async function submitBooking(data) {
     collection(db, "bookings"),
     where("phone", "==", phone),
     where("date", "==", date),
-    where("source.displayName", "==", sourceDisplayName),
-    where("destination.displayName", "==", destinationDisplayName)
+    where("source.fullAddress", "==", sourceAddress),
+    where("destination.fullAddress", "==", destinationAddress)
   );
 
   const existing = await getDocs(bookingQuery);
@@ -100,11 +105,12 @@ export default async function submitBooking(data) {
     duration,
     name,
     phone,
-    userId,
-    userEmail,
+    userId: userId || null,
+    userEmail: userEmail || null,
     status: "pending",
     createdAt: serverTimestamp(),
   };
 
   await addDoc(collection(db, "bookings"), bookingEntry);
+  return bookingId; // ✅ return bookingId to show in toast
 }

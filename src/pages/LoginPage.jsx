@@ -9,6 +9,7 @@ import {
 import { auth, db } from '../utils/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -16,7 +17,6 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  // ✅ Email/Password Login
   const handleEmailLogin = async (e) => {
     e.preventDefault();
     try {
@@ -29,7 +29,6 @@ const LoginPage = () => {
     }
   };
 
-  // ✅ Google Popup Login
   const handleGoogleLogin = async () => {
     try {
       const provider = new GoogleAuthProvider();
@@ -57,58 +56,70 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen px-4 bg-gray-100">
-      <div className="w-full max-w-md p-8 bg-white shadow-xl rounded-2xl">
-        <h2 className="mb-6 text-2xl font-bold text-center">Login to Pranav Drop Taxi</h2>
+    <div
+      className="relative min-h-screen bg-fixed bg-center bg-cover"
+      style={{ backgroundImage: "url('taxi.jpg')" }}
+    >
+      <div className="flex items-center justify-center min-h-screen px-4 bg-black/70">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="w-full max-w-md p-8 text-white shadow-2xl sm:p-10 bg-black/80 rounded-xl"
+        >
+          <h2 className="mb-6 text-3xl font-bold text-center text-yellow-300">
+            Login to Pranav Drop Taxi
+          </h2>
 
-        <form onSubmit={handleEmailLogin} className="space-y-4">
-          <div>
-            <label className="block mb-1 font-medium">Email</label>
-            <input
-              type="email"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1 font-medium">Password</label>
-            <div className="relative">
+          <form onSubmit={handleEmailLogin} className="space-y-4">
+            <div>
+              <label className="block mb-1 font-medium text-yellow-200">Email</label>
               <input
-                type={showPassword ? 'text' : 'password'}
-                className="w-full px-4 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                type="email"
+                className="w-full px-4 py-2 text-black border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
-              <span
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute text-gray-500 transform -translate-y-1/2 cursor-pointer right-3 top-1/2"
-              >
-                {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
-              </span>
             </div>
-          </div>
+
+            <div>
+              <label className="block mb-1 font-medium text-yellow-200">Password</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  className="w-full px-4 py-2 pr-10 text-black border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <span
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute text-gray-600 transform -translate-y-1/2 cursor-pointer right-3 top-1/2"
+                >
+                  {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-2 font-bold text-black transition-colors bg-yellow-400 rounded-lg hover:bg-yellow-300"
+            >
+              Login
+            </button>
+          </form>
+
+          <div className="my-4 text-center text-gray-400">or</div>
 
           <button
-            type="submit"
-            className="w-full py-2 font-semibold text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
+            onClick={handleGoogleLogin}
+            className="flex items-center justify-center w-full gap-3 py-2 transition-colors border rounded-lg hover:bg-yellow-100/20"
           >
-            Login
+            <FcGoogle size={22} />
+            <span className="font-medium text-white">Continue with Google</span>
           </button>
-        </form>
-
-        <div className="my-4 text-center text-gray-500">or</div>
-
-        <button
-          onClick={handleGoogleLogin}
-          className="flex items-center justify-center w-full gap-3 py-2 transition-colors border rounded-lg hover:bg-gray-100"
-        >
-          <FcGoogle size={20} />
-          <span className="font-medium">Continue with Google</span>
-        </button>
+        </motion.div>
       </div>
     </div>
   );

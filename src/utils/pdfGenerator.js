@@ -4,14 +4,16 @@ import autoTable from 'jspdf-autotable';
 export const generateInvoicePDF = (booking) => {
   const doc = new jsPDF();
 
-  const toNum = (n) => (+n ? +n : 0);
+  const toNum = (n) => (!isNaN(+n) ? +n : 0);
+  const formatRs = (n) => `Rs. ${toNum(n).toLocaleString('en-IN')}`;
+
   const baseCost = toNum(booking.cost);
   const toll = toNum(booking.tollCharges);
   const parking = toNum(booking.parkingCharges);
   const hill = toNum(booking.hillCharges);
   const permit = toNum(booking.permitCharges);
-  const distance = toNum(booking.distance);
-  const duration = toNum(booking.duration);
+  const distance = Math.round(toNum(booking.distance));
+  const duration = Math.round(toNum(booking.duration));
 
   const isRound = !!booking.returnDate;
   const noOfDays = isRound ? getNoOfDays(booking.date, booking.returnDate) : 1;
@@ -24,7 +26,7 @@ export const generateInvoicePDF = (booking) => {
 
   const durationText = formatDuration(duration);
 
-  // Header
+  // ===== HEADER =====
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
   doc.text('Pranav Drop Taxi', 105, 16, { align: 'center' });
@@ -34,37 +36,38 @@ export const generateInvoicePDF = (booking) => {
   doc.text('Phone: +91 98849 49171', 105, 22, { align: 'center' });
   doc.text('GST No: 33XXXXXXXXXXZ5', 105, 28, { align: 'center' });
 
-  // Booking Info - Left
+  // ===== Booking Info (Left) =====
   doc.setFontSize(10);
   doc.text(`Booking ID: ${booking.bookingId || booking.id}`, 14, 36);
-  doc.text(`Customer Name: ${booking.name}`, 14, 42);
-  doc.text(`Phone: ${booking.phone}`, 14, 48);
-  doc.text(`Booked Date: ${new Date().toLocaleDateString()}`, 14, 54);
+  doc.text(`Customer Name: ${booking.name || '-'}`, 14, 42);
+  doc.text(`Phone: ${booking.phone || '-'}`, 14, 48);
+  doc.text(`Invoice Date: ${new Date().toLocaleDateString()}`, 14, 54);
 
-  // Trip Info - Right
+  // ===== Trip Info (Right) =====
   const rightX = 140;
   doc.text(`Trip Type: ${isRound ? 'Round Trip' : 'One Way'}`, rightX, 36);
   doc.text(`Journey Date: ${formatDate(booking.date)}`, rightX, 42);
   if (isRound) {
     doc.text(`Return Date: ${formatDate(booking.returnDate)}`, rightX, 48);
-    doc.text(`No of Days: ${noOfDays}`, rightX, 54);
+    doc.text(`Trip Days: ${noOfDays}`, rightX, 54);
   }
 
-  // Table 1 – Trip Summary
+  // ===== Table 1: Trip Summary =====
   autoTable(doc, {
     startY: 62,
-    head: [['From', 'To', 'Distance (km)', 'Duration', 'Base + Driver Beta']],
+    head: [['From', 'To', 'Distance', 'Duration', 'Base Fare + Driver Bata']],
     body: [
       [
-        booking.source,
-        booking.destination,
+        booking.source?.displayName || booking.source?.formattedAddress || '-',
+        booking.destination?.displayName || booking.destination?.formattedAddress || '-',
+
         `${distance} km`,
         durationText,
-        `Rs. ${baseCost} + Rs. ${driverBataPerDay} × ${noOfDays} = Rs. ${driverBataTotal}`
+        `${formatRs(baseCost)} + ${formatRs(driverBataPerDay)} × ${noOfDays} = ${formatRs(driverBataTotal)}`
       ],
       [
         { content: 'Subtotal (Base + Bata)', colSpan: 4, styles: { halign: 'right', fontStyle: 'bold' } },
-        `Rs. ${totalFirst}`
+        formatRs(totalFirst)
       ]
     ],
     styles: {
@@ -75,29 +78,28 @@ export const generateInvoicePDF = (booking) => {
       lineWidth: 0.2,
     },
     headStyles: {
-      fillColor: [255, 255, 255],
-      textColor: [0, 0, 0],
+      fillColor: [240, 240, 240],
       fontStyle: 'bold',
     },
   });
 
   const afterTripY = doc.lastAutoTable.finalY + 5;
 
-  // Table 2 – Additional Charges
+  // ===== Table 2: Additional Charges =====
   autoTable(doc, {
     startY: afterTripY,
     head: [['Toll', 'Parking', 'Hill', 'Permit', 'Total']],
     body: [
       [
-        `Rs. ${toll}`,
-        `Rs. ${parking}`,
-        `Rs. ${hill}`,
-        `Rs. ${permit}`,
-        `Rs. ${totalSecond}`
+        formatRs(toll),
+        formatRs(parking),
+        formatRs(hill),
+        formatRs(permit),
+        formatRs(totalSecond)
       ],
       [
         { content: 'Subtotal (Extras)', colSpan: 4, styles: { halign: 'right', fontStyle: 'bold' } },
-        `Rs. ${totalSecond}`
+        formatRs(totalSecond)
       ]
     ],
     styles: {
@@ -108,41 +110,39 @@ export const generateInvoicePDF = (booking) => {
       lineWidth: 0.2,
     },
     headStyles: {
-      fillColor: [255, 255, 255],
-      textColor: [0, 0, 0],
+      fillColor: [240, 240, 240],
       fontStyle: 'bold',
     },
   });
 
   const afterExtrasY = doc.lastAutoTable.finalY + 10;
 
-  // Grand Total Summary
+  // ===== Grand Total =====
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
-  doc.text(`Grand Total: Rs. ${total}`, 14, afterExtrasY);
+  doc.text(`Grand Total: ${formatRs(total)}`, 14, afterExtrasY);
   doc.setFont('helvetica', 'normal');
-  doc.text(`Paid: Rs. ${total}`, 14, afterExtrasY + 6);
+  doc.text(`Amount Paid: ${formatRs(total)}`, 14, afterExtrasY + 6);
 
-  // Thank You
+  // ===== Thank You =====
   doc.setFontSize(14);
   doc.setFont('helvetica', 'italic');
-  doc.text(`Thank you, ${booking.name}!`, 105, afterExtrasY + 20, { align: 'center' });
+  doc.text(`Thank you, ${booking.name || 'Customer'}!`, 105, afterExtrasY + 20, { align: 'center' });
 
-  // PAGE 2: Terms and Conditions
+  // ===== Page 2: Terms & Conditions =====
   doc.addPage();
-
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
   doc.text('Terms & Conditions:', 14, 20);
 
   const terms = [
-    '1. Driver Bata is Rs. 400 per day and is added for outstation trips.',
-    '2. Toll, Parking, Permit, and Hill charges are extra based on actuals.',
-    '3. Extra hours or kilometers beyond the estimate will be charged separately.',
-    '4. Each calendar day is counted as one full trip day.',
-    '5. Bookings are confirmed only after official confirmation from our team.',
-    '6. If a vehicle is unavailable, a similar or better one will be arranged.',
-    '7. Prices may vary based on fuel cost, season, or route changes.',
+    '1. Driver Bata is Rs. 400 per day for outstation trips.',
+    '2. Toll, Parking, Permit, and Hill charges are extra (actuals).',
+    '3. Additional kms/hours are chargeable separately.',
+    '4. Each calendar day counts as one trip day.',
+    '5. Booking is valid only after confirmation from our team.',
+    '6. In case of unavailability, a similar or better vehicle will be arranged.',
+    '7. Prices are subject to seasonal, fuel, and route changes.',
   ];
 
   doc.setFont('helvetica', 'normal');
@@ -156,21 +156,22 @@ export const generateInvoicePDF = (booking) => {
 
   doc.setFont('helvetica', 'normal');
   doc.text(
-    'We take your safety seriously, but passengers are responsible for their personal belongings.',
+    'Passengers are responsible for their belongings. Check before exiting.',
     14,
     safetyStartY + 8
   );
   doc.text(
-    'Please check your items before leaving the vehicle. We are not liable for lost or forgotten items.',
+    'We are not liable for lost or forgotten items.',
     14,
     safetyStartY + 16
   );
 
   // Save PDF
-  doc.save(`${booking.bookingId || booking.id}.pdf`);
+  const fileName = `${booking.bookingId || booking.id || 'invoice'}.pdf`;
+  doc.save(fileName);
 };
 
-// Helpers
+// ===== Helper Functions =====
 function getNoOfDays(start, end) {
   const startDate = new Date(start);
   const endDate = new Date(end);

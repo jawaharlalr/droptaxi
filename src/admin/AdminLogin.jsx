@@ -1,9 +1,9 @@
-// Updated AdminLogin.jsx using Firebase Auth and role-based access
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../utils/firebase';
+import { motion } from 'framer-motion';
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
@@ -21,7 +21,6 @@ const AdminLogin = () => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Fetch user document from Firestore
       const userDocRef = doc(db, 'users', user.uid);
       const userDoc = await getDoc(userDocRef);
 
@@ -40,35 +39,45 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen px-4 bg-gray-100">
-      <div className="w-full max-w-md p-6 bg-white rounded shadow">
-        <h2 className="mb-6 text-2xl font-bold text-center">Pranav Drop Taxi - Admin Login</h2>
-        <form onSubmit={handleLogin} className="space-y-4">
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2 text-white transition bg-black rounded hover:bg-gray-800"
-          >
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
+    <div
+      className="relative min-h-screen bg-fixed bg-center bg-cover"
+      style={{ backgroundImage: "url('/taxi.jpg')" }}
+    >
+      <div className="flex items-center justify-center min-h-screen px-4 bg-black/80">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="w-full max-w-md p-6 shadow-lg sm:p-8 bg-black/90 rounded-xl"
+        >
+          <h2 className="mb-6 text-3xl font-bold text-center text-yellow-300">Admin Login</h2>
+          <form onSubmit={handleLogin} className="space-y-4 text-white">
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-2 placeholder-gray-300 bg-transparent border rounded focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              required
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-2 placeholder-gray-300 bg-transparent border rounded focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              required
+            />
+            {error && <p className="text-sm text-red-500">{error}</p>}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-2 font-semibold text-black transition bg-yellow-400 rounded hover:bg-yellow-300"
+            >
+              {loading ? 'Logging in...' : 'Login'}
+            </button>
+          </form>
+        </motion.div>
       </div>
     </div>
   );

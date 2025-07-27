@@ -97,7 +97,7 @@ export default function AboutUs() {
             Why Choose Us?
           </h2>
           <p className="max-w-2xl mx-auto text-gray-300">
-            We’ve helped thousands of customers reach their destinations safely
+            We’ve helped more number of customers reach their destinations safely
             and comfortably. Whether you're traveling for business or leisure,
             Pranav Drop Taxi is your go-to ride.
           </p>

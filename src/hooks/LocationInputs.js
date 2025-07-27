@@ -35,12 +35,21 @@ const LocationInputs = ({
             fields: ['displayName', 'location', 'formattedAddress'],
           });
 
+          const lat =
+            typeof place.location?.lat === 'function'
+              ? place.location.lat()
+              : place.location?.lat;
+
+          const lng =
+            typeof place.location?.lng === 'function'
+              ? place.location.lng()
+              : place.location?.lng;
+
           const data = {
-            displayName: place.displayName,
-            address: place.formattedAddress,
+            address: `${place.displayName || ''}, ${place.formattedAddress || ''}`.trim(),
             location: {
-              lat: place.location?.lat,
-              lng: place.location?.lng,
+              lat,
+              lng,
             },
           };
 

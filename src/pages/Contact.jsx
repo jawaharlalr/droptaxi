@@ -31,10 +31,10 @@ export default function Contact() {
 
     try {
       await emailjs.send(
-        "service_8qzt88m",       // Replace with your actual EmailJS Service ID
-        "template_v322l08",      // Replace with your actual Template ID
+        "service_8qzt88m",
+        "template_v322l08",
         templateParams,
-        "vwfMkbQDSmOyqu0VG"      // Replace with your EmailJS Public Key
+        "vwfMkbQDSmOyqu0VG"
       );
 
       toast.success(
@@ -79,14 +79,14 @@ export default function Contact() {
 
             <div className="flex items-center gap-3">
               <Phone className="w-5 h-5 text-yellow-400" />
-              <a href="tel:+919884609789" className="text-white hover:underline">
+              <a href="tel:+919884609789" className="text-white hover:text-yellow-400">
                 +91 9884609789
               </a>
             </div>
 
             <div className="flex items-center gap-3">
               <Mail className="w-5 h-5 text-yellow-400" />
-              <a href="mailto:droptaxipravan@gmail.com" className="text-white hover:underline">
+              <a href="mailto:droptaxipravan@gmail.com" className="text-white hover:text-yellow-400">
                 droptaxipravan@gmail.com
               </a>
             </div>
