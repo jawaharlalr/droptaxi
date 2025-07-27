@@ -40,13 +40,24 @@ const ManageUsers = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
+  const handleDelete = async (userId) => {
+    if (!window.confirm('Are you sure you want to delete this user and all related bookings?')) return;
     try {
-      await deleteDoc(doc(db, 'users', id));
+      // Delete related bookings first
+      const bookingsRef = collection(db, 'bookings');
+      const bookingsSnapshot = await getDocs(bookingsRef);
+      const userBookings = bookingsSnapshot.docs.filter(doc => doc.data().userId === userId);
+
+      for (const booking of userBookings) {
+        await deleteDoc(doc(db, 'bookings', booking.id));
+      }
+
+      // Delete user
+      await deleteDoc(doc(db, 'users', userId));
       fetchUsers();
     } catch (err) {
-      alert('Failed to delete user');
+      console.error(err);
+      alert('Failed to delete user and related bookings');
     }
   };
 

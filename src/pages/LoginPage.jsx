@@ -8,8 +8,9 @@ import {
 } from 'firebase/auth';
 import { auth, db } from '../utils/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Home } from 'lucide-react'; // ✅ Home icon
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -60,6 +61,15 @@ const LoginPage = () => {
       className="relative min-h-screen bg-fixed bg-center bg-cover"
       style={{ backgroundImage: "url('taxi.jpg')" }}
     >
+      {/* ✅ Home Icon Button */}
+      <Link
+        to="/"
+        className="absolute flex items-center gap-1 px-3 py-2 text-sm font-medium text-black transition bg-white rounded-md shadow top-4 right-4 hover:bg-gray-200"
+      >
+        <Home size={18} />
+        Home
+      </Link>
+
       <div className="flex items-center justify-center min-h-screen px-4 bg-black/70">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
