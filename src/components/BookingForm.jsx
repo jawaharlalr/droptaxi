@@ -1,37 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2, AlertTriangle } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { CheckCircle2, AlertTriangle } from "lucide-react";
+import { Link } from "react-router-dom";
 
-import TripTypeSelector from './BookingForm/TripTypeSelector';
-import DateTimePicker from './BookingForm/DateTimePicker';
-import LocationInputs from './BookingForm/LocationInputs';
-import VehicleSelector from './BookingForm/VehicleSelector';
-import ContactInputs from './BookingForm/ContactInputs';
-import SubmitButton from './BookingForm/SubmitButton';
-import TripSummary from './TripSummary';
+import TripTypeSelector from "./BookingForm/TripTypeSelector";
+import DateTimePicker from "./BookingForm/DateTimePicker";
+import LocationInputs from "./BookingForm/LocationInputs";
+import VehicleSelector from "./BookingForm/VehicleSelector";
+import ContactInputs from "./BookingForm/ContactInputs";
+import SubmitButton from "./BookingForm/SubmitButton";
+import TripSummary from "./TripSummary";
 
-import { useAuth } from '../utils/AuthContext';
-import useDistanceCalculator from '../hooks/useDistanceCalculator';
-import submitBooking from '../utils/submitBooking';
+import { useAuth } from "../utils/AuthContext";
+import useDistanceCalculator from "../hooks/useDistanceCalculator";
+import submitBooking from "../utils/submitBooking";
 
 const BookingForm = () => {
-  const [tripType, setTripType] = useState('oneway');
-  const [date, setDate] = useState('');
-  const [returnDate, setReturnDate] = useState('');
-  const [vehicleType, setVehicleType] = useState('');
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [tripType, setTripType] = useState("oneway");
+  const [date, setDate] = useState("");
+  const [returnDate, setReturnDate] = useState("");
+  const [vehicleType, setVehicleType] = useState("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [loginCompleted, setLoginCompleted] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [bookingId, setBookingId] = useState('');
+  const [bookingId, setBookingId] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const [sourcePlace, setSourcePlace] = useState(null);
   const [destinationPlace, setDestinationPlace] = useState(null);
-  const [pickupError, setPickupError] = useState('');
-  const [dropError, setDropError] = useState('');
+  const [pickupError, setPickupError] = useState("");
+  const [dropError, setDropError] = useState("");
   const [showSummary, setShowSummary] = useState(false);
 
   const { user, loginWithGoogle } = useAuth();
@@ -39,62 +41,67 @@ const BookingForm = () => {
   const {
     distance = null,
     duration = null,
-    cost = null
+    cost = null,
   } = useDistanceCalculator({
     sourcePlace,
     destinationPlace,
     vehicleType,
-    tripType
+    tripType,
   }) || {};
 
   const validatePlace = (place, label) => {
     try {
       if (
         !place?.displayName ||
-        typeof place?.location?.lat !== 'function' ||
-        typeof place?.location?.lng !== 'function'
+        typeof place?.location?.lat !== "function" ||
+        typeof place?.location?.lng !== "function"
       ) {
         return `${label} is invalid`;
       }
       const lat = place.location.lat();
       const lng = place.location.lng();
-      if (typeof lat !== 'number' || typeof lng !== 'number') {
+      if (typeof lat !== "number" || typeof lng !== "number") {
         return `${label} coordinates are invalid`;
       }
     } catch {
       return `${label} is invalid`;
     }
-    return '';
+    return "";
   };
 
   const validateForm = () => {
-    const sourceErr = validatePlace(sourcePlace, 'Pickup location');
-    const destErr = validatePlace(destinationPlace, 'Drop location');
+    const sourceErr = validatePlace(sourcePlace, "Pickup location");
+    const destErr = validatePlace(destinationPlace, "Drop location");
 
     setPickupError(sourceErr);
     setDropError(destErr);
 
-    if (sourceErr || destErr) return 'Location validation failed';
-    if (!vehicleType) return 'Please select a vehicle';
-    if (!name.trim().match(/^[A-Za-z ]+$/)) return 'Name must contain only letters';
-    if (!phone.trim().match(/^[6-9]\d{9}$/)) return 'Enter a valid 10-digit Indian phone number';
-    if (!date) return 'Please select a travel date';
-    if (tripType === 'roundtrip' && !returnDate) return 'Please select a return date';
-    if (!distance || !cost || !duration) return 'Trip details not calculated yet';
-    return '';
+    if (sourceErr || destErr) return "Location validation failed";
+    if (!vehicleType) return "Please select a vehicle";
+    if (!name.trim().match(/^[A-Za-z ]+$/))
+      return "Name must contain only letters";
+    if (!phone.trim().match(/^[6-9]\d{9}$/))
+      return "Enter a valid 10-digit Indian phone number";
+    if (!date) return "Please select a travel date";
+    if (tripType === "roundtrip" && !returnDate)
+      return "Please select a return date";
+    if (!distance || !cost || !duration)
+      return "Trip details not calculated yet";
+    if (!acceptedTerms) return "Please accept the Terms and Conditions";
+    return "";
   };
 
   useEffect(() => {
     const inputsValid =
       sourcePlace &&
       destinationPlace &&
-      !validatePlace(sourcePlace, 'Pickup location') &&
-      !validatePlace(destinationPlace, 'Drop location') &&
+      !validatePlace(sourcePlace, "Pickup location") &&
+      !validatePlace(destinationPlace, "Drop location") &&
       vehicleType &&
       name.trim().match(/^[A-Za-z ]+$/) &&
       phone.trim().match(/^[6-9]\d{9}$/) &&
       date &&
-      (tripType === 'oneway' || returnDate) &&
+      (tripType === "oneway" || returnDate) &&
       distance &&
       duration &&
       cost;
@@ -111,28 +118,29 @@ const BookingForm = () => {
     tripType,
     distance,
     duration,
-    cost
+    cost,
   ]);
 
   const resetForm = () => {
-    setTripType('oneway');
-    setDate('');
-    setReturnDate('');
-    setVehicleType('');
-    setName('');
-    setPhone('');
+    setTripType("oneway");
+    setDate("");
+    setReturnDate("");
+    setVehicleType("");
+    setName("");
+    setPhone("");
     setSourcePlace(null);
     setDestinationPlace(null);
-    setPickupError('');
-    setDropError('');
+    setPickupError("");
+    setDropError("");
     setShowSummary(false);
+    setAcceptedTerms(false);
   };
 
   const handleFinalSubmit = async () => {
     const bookingData = {
-      tripType: tripType === 'roundtrip' ? 'round' : 'single',
+      tripType: tripType === "roundtrip" ? "round" : "single",
       date,
-      returnDate: tripType === 'roundtrip' ? returnDate : null,
+      returnDate: tripType === "roundtrip" ? returnDate : null,
       source: sourcePlace,
       destination: destinationPlace,
       vehicleType,
@@ -142,7 +150,7 @@ const BookingForm = () => {
       name,
       phone,
       userId: user?.uid || null,
-      userEmail: user?.email || null
+      userEmail: user?.email || null,
     };
 
     try {
@@ -151,8 +159,8 @@ const BookingForm = () => {
       setShowSuccessModal(true);
       resetForm();
     } catch (err) {
-      console.error('Submit error:', err);
-      setError('Booking failed. Please try again.');
+      console.error("Submit error:", err);
+      setError("Booking failed. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -160,11 +168,11 @@ const BookingForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     const validationError = validateForm();
     if (validationError) {
-      if (validationError !== 'Location validation failed') {
+      if (validationError !== "Location validation failed") {
         setError(validationError);
       }
       return;
@@ -182,8 +190,8 @@ const BookingForm = () => {
 
       await handleFinalSubmit();
     } catch (err) {
-      console.error('Login or submission error:', err);
-      setError('Something went wrong during login.');
+      console.error("Login or submission error:", err);
+      setError("Something went wrong during login.");
       setSubmitting(false);
     }
   };
@@ -222,6 +230,7 @@ const BookingForm = () => {
           setName={setName}
           setPhone={setPhone}
         />
+
         <AnimatePresence>
           {distance && cost && duration && showSummary && (
             <motion.div
@@ -235,8 +244,39 @@ const BookingForm = () => {
                 distance={distance}
                 duration={duration}
                 cost={cost}
-                tripType={tripType === 'roundtrip' ? 'round' : 'single'}
+                tripType={tripType === "roundtrip" ? "round" : "single"}
               />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {showSummary && !showSuccessModal && (
+            <motion.div
+              key="terms"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex items-center gap-2 text-sm text-white"
+            >
+              <input
+                type="checkbox"
+                id="acceptTerms"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                className="w-4 h-4"
+              />
+              <label htmlFor="acceptTerms" className="flex-1">
+                I accept the{" "}
+                <Link
+                  to="/terms-and-conditions"
+                  className="text-blue-400 hover:underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Terms and Conditions
+                </Link>
+              </label>
             </motion.div>
           )}
         </AnimatePresence>
@@ -271,9 +311,13 @@ const BookingForm = () => {
               transition={{ duration: 0.3 }}
             >
               <CheckCircle2 className="w-10 h-10 mx-auto mb-3 text-green-500" />
-              <h2 className="mb-2 text-xl font-bold text-gray-800">Booking Successful</h2>
+              <h2 className="mb-2 text-xl font-bold text-gray-800">
+                Booking Successful
+              </h2>
               <p className="mb-4 text-gray-600">Your booking ID is:</p>
-              <p className="px-2 py-1 font-mono text-lg text-gray-800 bg-gray-100 rounded">{bookingId}</p>
+              <p className="px-2 py-1 font-mono text-lg text-gray-800 bg-gray-100 rounded">
+                {bookingId}
+              </p>
               <button
                 onClick={() => setShowSuccessModal(false)}
                 className="px-4 py-2 mt-6 font-semibold text-white bg-green-500 hover:bg-green-600 rounded-xl"
@@ -301,7 +345,9 @@ const BookingForm = () => {
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <h3 className="mb-4 text-xl font-bold text-gray-800">Login Successful</h3>
+              <h3 className="mb-4 text-xl font-bold text-gray-800">
+                Login Successful
+              </h3>
               <p className="mb-6 text-gray-600">Please confirm your booking.</p>
               <button
                 onClick={() => {

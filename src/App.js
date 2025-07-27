@@ -14,6 +14,8 @@ import MyBookings from './pages/MyBookings';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import LoginPage from './pages/LoginPage';
+import TermsAndConditions from './pages/TermsAndConditions';
+
 
 import AdminDashboard from './admin/AdminDashboard';
 import AdminLogin from './admin/AdminLogin';
@@ -69,6 +71,8 @@ function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/my-bookings" element={<MyBookings />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+
 
             {/* Admin Login */}
             <Route path="/admin" element={<AdminLogin />} />
