@@ -216,33 +216,43 @@ const MyBookings = () => {
               return (
                 <li
                   key={id}
-                  className="p-4 text-white border border-yellow-500 rounded-lg shadow-lg bg-black/70 backdrop-blur-md"
+                  className="relative p-4 text-white border border-yellow-500 rounded-lg shadow-lg bg-black/70 backdrop-blur-md"
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-yellow-300">
-                        {index + 1}.
-                      </span>
-                      <h3 className="text-lg font-semibold break-all">
-                        Booking ID: {bookingId || id}
-                      </h3>
+                  {/* Top Row: Booking ID + Right Column */}
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-yellow-300">
+                          {index + 1}.
+                        </span>
+                        <h3 className="text-base font-semibold break-all sm:text-lg">
+                          Booking ID: {bookingId || id}
+                        </h3>
+                      </div>
                     </div>
-                    {getStatusTag(status)}
+
+                    <div className="text-right">
+                      {/* Status Tag (Right aligned) */}
+                      <div className="mb-1">{getStatusTag(status)}</div>
+
+                      {/* Expand/Collapse Button (Right aligned) */}
+                      <button
+                        onClick={() => toggleExpand(id)}
+                        className="text-sm text-yellow-400 hover:underline"
+                      >
+                        {isExpanded ? "Collapse" : "Expand"}
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm">
-                      <strong>From:</strong> {source?.displayName || "N/A"} 🡺{" "}
-                      <strong>To:</strong> {destination?.displayName || "N/A"}
-                    </p>
-                    <button
-                      onClick={() => toggleExpand(id)}
-                      className="text-sm text-yellow-400 hover:underline"
-                    >
-                      {isExpanded ? "Collapse" : "Expand"}
-                    </button>
-                  </div>
+                  {/* From → To */}
+                  <p className="mt-2 text-sm">
+                    <strong>From:</strong> {source?.displayName || "N/A"}{" "}
+                    <span className="mx-1">🡺</span>
+                    <strong>To:</strong> {destination?.displayName || "N/A"}
+                  </p>
 
+                  {/* Cost */}
                   <p className="flex items-center gap-2 mt-2 text-sm font-semibold text-yellow-300">
                     Total Cost: ₹{total}
                     {status?.toLowerCase() === "completed" ? (
@@ -257,101 +267,149 @@ const MyBookings = () => {
                   </p>
 
                   {isExpanded && (
-                    <div className="grid grid-cols-1 gap-4 mt-4 text-sm md:grid-cols-2">
-                      <div className="space-y-1">
+                    <div className="grid grid-cols-1 gap-4 p-4 mt-4 text-xs text-white border border-gray-600 rounded-lg bg-black/90 sm:text-sm md:grid-cols-2">
+                      {/* Left Column */}
+                      <div className="space-y-2">
                         <p>
-                          <strong>Trip Type:</strong>{" "}
-                          {isRound ? "Round Trip" : "Single Trip"}
+                          <span className="font-semibold text-gray-300">
+                            Trip Type:
+                          </span>{" "}
+                          <span>{isRound ? "Round Trip" : "Single Trip"}</span>
                         </p>
                         <p>
-                          <strong>Date:</strong> {date || "N/A"}
+                          <span className="font-semibold text-gray-300">
+                            Date:
+                          </span>{" "}
+                          <span>{date || "N/A"}</span>
                         </p>
                         {isRound && returnDate && (
                           <p>
-                            <strong>Return Date:</strong> {returnDate}
+                            <span className="font-semibold text-gray-300">
+                              Return Date:
+                            </span>{" "}
+                            <span>{returnDate}</span>
                           </p>
                         )}
                         <p>
-                          <strong>Vehicle:</strong>{" "}
-                          {vehicleLabels[vehicleType] || vehicleType || "N/A"}
+                          <span className="font-semibold text-gray-300">
+                            Vehicle:
+                          </span>{" "}
+                          <span>
+                            {vehicleLabels[vehicleType] || vehicleType || "N/A"}
+                          </span>
                         </p>
                         {distance && (
                           <p>
-                            <strong>Distance:</strong> {distance} km{" "}
-                            {status?.toLowerCase() !== "completed" && (
-                              <span className="text-gray-500">(Estimated)</span>
-                            )}
+                            <span className="font-semibold text-gray-300">
+                              Distance:
+                            </span>{" "}
+                            <span>
+                              {distance} km{" "}
+                              {status?.toLowerCase() !== "completed" && (
+                                <span className="text-gray-500">
+                                  (Estimated)
+                                </span>
+                              )}
+                            </span>
                           </p>
                         )}
                         {duration && (
                           <p>
-                            <strong>Duration:</strong>{" "}
-                            {formatDuration(duration)}{" "}
-                            {status?.toLowerCase() !== "completed" && (
-                              <span className="text-gray-500">(Estimated)</span>
-                            )}
+                            <span className="font-semibold text-gray-300">
+                              Duration:
+                            </span>{" "}
+                            <span>
+                              {formatDuration(duration)}{" "}
+                              {status?.toLowerCase() !== "completed" && (
+                                <span className="text-gray-500">
+                                  (Estimated)
+                                </span>
+                              )}
+                            </span>
                           </p>
                         )}
                       </div>
 
-                      <div className="space-y-1">
+                      {/* Right Column */}
+                      <div className="space-y-2">
                         <p>
-                          <strong>Base Fare:</strong> ₹{base}
+                          <span className="font-semibold text-gray-300">
+                            Base Fare:
+                          </span>{" "}
+                          <span>₹{base}</span>
                         </p>
                         <p>
-                          <strong>Driver Bata:</strong> ₹400 × {days} day(s) = ₹
-                          {bata}
+                          <span className="font-semibold text-gray-300">
+                            Driver Bata:
+                          </span>{" "}
+                          <span>
+                            ₹400 × {days} day(s) = ₹{bata}
+                          </span>
                         </p>
-                        {toll > 0 && (
+                        {isRound && returnDate && toll > 0 && (
                           <p>
-                            <strong>Toll Charges:</strong> ₹{toll}
+                            <span className="font-semibold text-gray-300">
+                              Toll Charges:
+                            </span>{" "}
+                            <span>₹{toll}</span>
                           </p>
                         )}
                         {parking > 0 && (
                           <p>
-                            <strong>Parking Charges:</strong> ₹{parking}
+                            <span className="font-semibold text-gray-300">
+                              Parking Charges:
+                            </span>{" "}
+                            <span>₹{parking}</span>
                           </p>
                         )}
                         {hill > 0 && (
                           <p>
-                            <strong>Hill Charges:</strong> ₹{hill}
+                            <span className="font-semibold text-gray-300">
+                              Hill Charges:
+                            </span>{" "}
+                            <span>₹{hill}</span>
                           </p>
                         )}
                         {permit > 0 && (
                           <p>
-                            <strong>Permit Charges:</strong> ₹{permit}
+                            <span className="font-semibold text-gray-300">
+                              Permit Charges:
+                            </span>{" "}
+                            <span>₹{permit}</span>
                           </p>
                         )}
-                        <p className="mt-2 text-xs italic text-yellow-400">
+                        <p className="pt-1 italic text-yellow-400">
                           Final fare may vary based on actual trip.
                         </p>
-                        <p className="text-xs italic font-semibold text-gray-400">
+                        <p className="italic font-medium text-gray-400">
                           {status?.toLowerCase() === "completed"
                             ? "* Charges are included above."
                             : "* Additional charges not yet included."}
                         </p>
                       </div>
 
+                      {/* Review Display */}
                       {status?.toLowerCase() === "completed" && review && (
-                        <div className="col-span-2 mt-4">
-                          <p className="mb-1 font-semibold text-yellow-300">
+                        <div className="col-span-1 mt-2 md:col-span-2">
+                          <p className="mb-1 text-sm font-semibold text-yellow-300">
                             Your Review:
                           </p>
-                          <p className="p-2 text-sm italic text-gray-300 bg-gray-800 rounded">
+                          <p className="p-2 text-xs italic text-gray-300 bg-gray-800 rounded sm:text-sm">
                             {review}
                           </p>
                         </div>
                       )}
 
+                      {/* Review Form */}
                       {status?.toLowerCase() === "completed" &&
                         (!review || review === "") && (
-                          <div className="col-span-2 mt-4">
-                            <p className="mb-1 font-semibold text-yellow-300">
+                          <div className="col-span-1 mt-2 md:col-span-2">
+                            <p className="mb-1 text-sm font-semibold text-yellow-300">
                               Rate Your Trip:
                             </p>
                             <textarea
                               rows={3}
-                              className="w-full p-2 text-black rounded-md"
+                              className="w-full p-2 text-sm text-black rounded-md"
                               placeholder="Write your review here..."
                               value={tempReview}
                               onChange={(e) => {

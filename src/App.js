@@ -16,7 +16,6 @@ import Contact from './pages/Contact';
 import LoginPage from './pages/LoginPage';
 import TermsAndConditions from './pages/TermsAndConditions';
 
-
 import AdminDashboard from './admin/AdminDashboard';
 import AdminLogin from './admin/AdminLogin';
 import ManageUsers from './admin/ManageUsers';
@@ -24,6 +23,7 @@ import AdminBookings from './admin/AdminBookings/AdminBookings';
 
 import { AuthProvider } from './utils/AuthContext';
 import AdminSidebar from './components/AdminSidebar';
+import ScrollToTop from './components/ScrollToTop'; // ✅ add this
 
 // ✅ Admin layout wrapper with sidebar
 const AdminLayout = () => (
@@ -63,6 +63,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
+        <ScrollToTop /> {/* ✅ Scroll to top on route change */}
         <LayoutWrapper>
           <Routes>
             {/* Public Pages */}
@@ -73,7 +74,6 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
 
-
             {/* Admin Login */}
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/admin-login" element={<AdminLogin />} />
@@ -83,8 +83,7 @@ function App() {
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="users" element={<ManageUsers />} />
               <Route path="bookings" element={<AdminBookings />} />
-              {/* Optional: redirect /admin → /admin/dashboard */}
-              <Route index element={<AdminDashboard />} />
+              <Route index element={<AdminDashboard />} /> {/* optional redirect */}
             </Route>
           </Routes>
         </LayoutWrapper>
