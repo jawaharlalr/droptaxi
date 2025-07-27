@@ -1,191 +1,142 @@
-import React, { useState, useRef } from 'react';
-import { useAuth } from '../utils/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { FaWhatsapp, FaPhoneAlt } from 'react-icons/fa';
-import { motion } from 'framer-motion'; // ✅ Framer Motion
-
+import React from 'react';
+import { motion } from 'framer-motion';
 import BookingForm from '../components/BookingForm';
-import usePlacesAutocomplete from '../hooks/usePlacesAutocomplete';
-import useDistanceCalculator from '../hooks/useDistanceCalculator';
-import validatePhone from '../utils/validatePhone';
-import submitBooking from '../utils/submitBooking';
+import { Car, ClipboardList, PhoneCall, CheckCircle } from 'lucide-react';
 
-const Home = () => {
-  const [tripType, setTripType] = useState('single');
-  const [source, setSource] = useState('');
-  const [destination, setDestination] = useState('');
-  const [date, setDate] = useState('');
-  const [returnDate, setReturnDate] = useState('');
-  const [vehicleType, setVehicleType] = useState('sedan');
-  const [distance, setDistance] = useState(null);
-  const [duration, setDuration] = useState(null);
-  const [cost, setCost] = useState(null);
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [message, setMessage] = useState('');
-
-  const sourceRef = useRef(null);
-  const destinationRef = useRef(null);
-
-  const today = new Date().toISOString().split('T')[0];
-  const [sourcePlaceId, setSourcePlaceId] = useState(null);
-  const [destinationPlaceId, setDestinationPlaceId] = useState(null);
-
-  const { user } = useAuth();
-  const navigate = useNavigate();
-
-  usePlacesAutocomplete(
-    sourceRef,
-    destinationRef,
-    setSource,
-    setSourcePlaceId,
-    setDestination,
-    setDestinationPlaceId
-  );
-
-  useDistanceCalculator(
-    sourcePlaceId,
-    destinationPlaceId,
-    vehicleType,
-    setDistance,
-    setDuration,
-    setCost,
-    setMessage,
-    tripType
-  );
-
-  const handleBooking = async () => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-
-    if (!source || !destination || !date || !cost || !name || !phone) {
-      setMessage('Please fill all required fields and wait for the estimate.');
-      return;
-    }
-
-    if (!validatePhone(phone)) {
-      setMessage('Enter a valid 10-digit phone number.');
-      return;
-    }
-
-    try {
-      await submitBooking({
-        name,
-        phone,
-        tripType,
-        vehicleType,
-        source,
-        destination,
-        date,
-        returnDate: tripType === 'round' ? returnDate : '',
-        cost,
-        duration,
-        distance,
-        userId: user.uid,
-      });
-
-      setMessage('✅ Booking submitted successfully!');
-      setSource('');
-      setDestination('');
-      setSourcePlaceId(null);
-      setDestinationPlaceId(null);
-      setDate('');
-      setReturnDate('');
-      setVehicleType('sedan');
-      setDistance(null);
-      setDuration(null);
-      setCost(null);
-      setPhone('');
-      setName('');
-    } catch (err) {
-      setMessage(err.message || '❌ Error submitting booking.');
-    }
-  };
-
+function Home() {
   return (
     <div
-      className="min-h-screen text-white bg-center bg-cover"
+      className="relative min-h-screen bg-fixed bg-center bg-cover"
       style={{ backgroundImage: "url('taxi.jpg')" }}
     >
-      <div className="flex flex-col items-center justify-center min-h-screen p-4 space-y-6 bg-black/70 sm:p-6">
-        {/* Hero Section */}
-        <motion.div
-          className="space-y-3 text-center"
-          initial={{ opacity: 0, y: -40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <h1 className="text-3xl font-bold sm:text-4xl drop-shadow-md">
-            Fast. Reliable. Affordable.
-          </h1>
-          <p className="max-w-md mx-auto text-sm text-gray-100 sm:text-base">
-            Book your outstation taxi with Pranav Drop Taxi. Transparent pricing and on-time pickup—always.
-          </p>
-        </motion.div>
+      <div className="min-h-screen bg-black/70">
 
-        {/* Booking Form */}
-        <motion.div
-          className="w-full max-w-3xl p-4 border shadow-2xl sm:p-6 bg-white/10 backdrop-blur-md rounded-xl border-white/20"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          <BookingForm
-    tripType={tripType}
-    setTripType={setTripType}
-    date={date}
-    setDate={setDate}
-    returnDate={returnDate}
-    setReturnDate={setReturnDate}
-    today={today}
-    source={source}
-    setSource={setSource}
-    destination={destination}
-    setDestination={setDestination}
-    sourceRef={sourceRef}
-    destinationRef={destinationRef}
-    vehicleType={vehicleType}
-    setVehicleType={setVehicleType}
-    distance={distance}
-    duration={duration}
-    cost={cost}
-    name={name}
-    setName={setName}
-    phone={phone}
-    setPhone={setPhone}
-    isNameEditable={true}
-    message={message}
-    onSubmit={handleBooking}
-  />
-</motion.div>
+        {/* 🟡 Hero Section */}
+        <div className="flex items-center justify-center min-h-screen px-4 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="max-w-2xl p-8 mx-auto shadow-xl bg-black/80 sm:p-10 rounded-xl"
+          >
+            <h1 className="mb-6 text-4xl font-extrabold text-yellow-300 sm:text-5xl drop-shadow-lg">
+              Welcome to DropTaxi
+            </h1>
+            <p className="mb-6 text-lg text-gray-100 sm:text-xl">
+              Book your ride easily and travel comfortably with us!
+            </p>
+            <a
+              href="#booking"
+              className="inline-block px-8 py-3 font-bold text-black transition bg-yellow-400 rounded-full shadow hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-300"
+            >
+              Book Now
+            </a>
+          </motion.div>
+        </div>
+
+        {/* 🟢 Booking Form Section */}
+        <section id="booking" className="px-4 py-16">
+          <div className="max-w-4xl p-6 mx-auto shadow-lg bg-black/80 sm:p-10 rounded-xl">
+            <h2 className="mb-6 text-3xl font-bold text-center text-yellow-300 sm:text-4xl">
+              Book Your Ride
+            </h2>
+            <BookingForm />
+          </div>
+        </section>
+
+        {/* 🔵 How It Works Section */}
+        <section className="px-4 py-16 text-center text-white" aria-label="How it works">
+          <h2 className="mb-6 text-3xl font-bold sm:text-4xl">How It Works</h2>
+          <div className="grid max-w-4xl gap-6 mx-auto sm:grid-cols-3">
+            {[
+              {
+                Icon: Car,
+                title: 'Choose Your Ride',
+                description: 'Select from a range of clean and comfortable vehicles.',
+              },
+              {
+                Icon: ClipboardList,
+                title: 'Enter Trip Details',
+                description: 'Fill in pickup and drop locations, trip type, and schedule.',
+              },
+              {
+                Icon: CheckCircle,
+                title: 'Confirm & Go',
+                description: 'Get instant confirmation and ride stress-free.',
+              },
+            ].map(({ Icon, title, description }, idx) => (
+              <div
+                key={idx}
+                className="p-4 transition rounded-lg hover:text-yellow-300"
+              >
+                <Icon className="w-8 h-8 mx-auto mb-2 text-yellow-300" />
+                <h3 className="mb-2 text-xl font-semibold">{title}</h3>
+                <p>{description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 🟣 Why Choose Us Section */}
+        <section className="px-4 py-16 text-center text-white" aria-label="Why choose DropTaxi">
+          <h2 className="mb-6 text-3xl font-bold sm:text-4xl">Why Choose DropTaxi?</h2>
+          <div className="grid max-w-5xl gap-6 mx-auto sm:grid-cols-3">
+            {[
+              {
+                Icon: Car,
+                title: 'Reliable Rides',
+                description: 'On-time pickups and clean vehicles ensure smooth travel.',
+              },
+              {
+                Icon: ClipboardList,
+                title: 'Transparent Pricing',
+                description: 'No hidden fees. Know your fare upfront.',
+              },
+              {
+                Icon: PhoneCall,
+                title: '24/7 Support',
+                description: 'Always here to help before, during, and after your trip.',
+              },
+            ].map(({ Icon, title, description }, idx) => (
+              <div
+                key={idx}
+                className="p-4 transition rounded-lg hover:text-yellow-300"
+              >
+                <Icon className="w-8 h-8 mx-auto mb-2 text-yellow-300" />
+                <h3 className="mb-2 text-xl font-semibold">{title}</h3>
+                <p>{description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 🧡 Testimonials Section */}
+        <section className="px-4 py-16 text-center text-white" aria-label="Customer testimonials">
+          <h2 className="mb-10 text-3xl font-bold sm:text-4xl">Customer Testimonials</h2>
+          <div className="grid max-w-5xl gap-8 mx-auto sm:grid-cols-2">
+            {[
+              {
+                quote: '"Smooth booking and polite driver. Will use again!"',
+                author: '– Aarthi S.',
+              },
+              {
+                quote: '"Affordable and safe. The car was very clean."',
+                author: '– Karthik M.',
+              },
+            ].map(({ quote, author }, idx) => (
+              <blockquote
+                key={idx}
+                className="p-6 transition rounded-lg shadow bg-black/60 hover:text-yellow-300"
+              >
+                <p>{quote}</p>
+                <footer className="mt-4 text-sm font-semibold">{author}</footer>
+              </blockquote>
+            ))}
+          </div>
+        </section>
       </div>
-
-      {/* Floating Buttons */}
-      <motion.div
-        className="fixed z-50 flex flex-col items-end space-y-2 bottom-4 right-2"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.0, duration: 0.6 }}
-      >
-        <a
-          href="https://wa.me/919884609789"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="p-3 text-white transition duration-300 transform bg-green-600 rounded-full shadow-lg hover:bg-green-700 hover:scale-105"
-        >
-          <FaWhatsapp size={20} />
-        </a>
-        <a
-          href="tel:9884609789"
-          className="items-center justify-center hidden p-3 text-white transition duration-300 transform bg-blue-600 rounded-full shadow-lg sm:flex hover:bg-blue-700 hover:scale-105"
-        >
-          <FaPhoneAlt size={18} />
-        </a>
-      </motion.div>
     </div>
   );
-};
+}
 
 export default Home;

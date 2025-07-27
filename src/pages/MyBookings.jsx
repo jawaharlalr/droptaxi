@@ -60,8 +60,9 @@ const MyBookings = () => {
   const toNum = (val) => (typeof val === 'number' ? val : parseFloat(val) || 0);
 
   const formatDuration = (minutes) => {
+    if (!minutes) return 'N/A';
     const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
+    const m = Math.round(minutes % 60);
     return `${h}h ${m}m`;
   };
 
@@ -112,8 +113,8 @@ const MyBookings = () => {
                 bookingId,
                 status,
                 tripType,
-                sourceRef,
-                destinationRef,
+                source,
+                destination,
                 date,
                 returnDate,
                 vehicleType,
@@ -132,8 +133,7 @@ const MyBookings = () => {
               const permit = toNum(permitCharges);
               const base = toNum(cost);
 
-              const normalizedTripType = (tripType || '').toLowerCase();
-              const isRound = normalizedTripType === 'round';
+              const isRound = (tripType || '').toLowerCase() === 'round';
               const days = getDays(date, isRound ? returnDate : date);
               const bata = days * 400;
               const total = base + bata + toll + parking + hill + permit;
@@ -156,7 +156,8 @@ const MyBookings = () => {
 
                   <div className="flex items-center justify-between mt-1">
                     <p className="text-sm text-black">
-                      <strong>From:</strong> {sourceRef} 🡺 <strong>To:</strong> {destinationRef}
+                      <strong>From:</strong> {source?.displayName || 'N/A'} 🡺{' '}
+                      <strong>To:</strong> {destination?.displayName || 'N/A'}
                     </p>
                     <button
                       onClick={() => toggleExpand(id)}
@@ -166,7 +167,6 @@ const MyBookings = () => {
                     </button>
                   </div>
 
-                  {/* Show total cost always */}
                   <p className="mt-2 text-sm font-semibold text-green-600">
                     Total Cost: ₹{total}{' '}
                     <span className="italic text-gray-500">(May vary)</span>

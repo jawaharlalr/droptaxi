@@ -42,7 +42,6 @@ const BookingRow = ({
   const DRIVER_BATA_PER_DAY = 400;
 
   const updateStatus = async (status) => {
-    // Step 1: Update Firestore
     try {
       await updateDoc(doc(db, 'bookings', b.id), { status });
       fetchBookings();
@@ -52,7 +51,6 @@ const BookingRow = ({
       return;
     }
 
-    // Step 2: Try opening WhatsApp message (optional)
     try {
       const msg = `Hi ${b.name},\nYour Booking ID: ${b.bookingId || b.id} is ${status}.\nThank You!`;
       const phoneWithCountryCode = `91${b.phone}`;
@@ -60,7 +58,6 @@ const BookingRow = ({
       window.open(waURL, '_blank');
     } catch (err) {
       console.error('⚠️ Failed to open WhatsApp:', err);
-      // Not alerting user here, since status update succeeded
     }
   };
 
@@ -77,9 +74,9 @@ const BookingRow = ({
         <td className="px-3 py-2">{b.phone}</td>
 
         <td className="px-3 py-2">
-          <div>{b.source}</div>
+          <div>{b.source?.displayName || '-'}</div>
           <div className="text-xs text-center text-gray-500">to</div>
-          <div>{b.destination}</div>
+          <div>{b.destination?.displayName || '-'}</div>
         </td>
 
         <td className="px-3 py-2 text-xs leading-5">

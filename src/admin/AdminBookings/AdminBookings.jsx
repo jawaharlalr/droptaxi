@@ -12,7 +12,7 @@ import { useAuth } from '../../utils/AuthContext';
 import BookingRow from './BookingRow';
 import { Link } from 'react-router-dom';
 
-const messaging = getMessaging(); // Firebase Messaging instance
+const messaging = getMessaging();
 
 const AdminBookings = () => {
   const { user, isAdmin, loading: authLoading } = useAuth();
@@ -23,7 +23,7 @@ const AdminBookings = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // 🔔 Register FCM token on login
+  // 🔔 Register admin token for push notifications
   useEffect(() => {
     if (authLoading || !user || !isAdmin) return;
 
@@ -31,39 +31,38 @@ const AdminBookings = () => {
       try {
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') {
-          console.warn('Notifications permission denied');
+          console.warn('Notification permission denied');
           return;
         }
 
         const token = await getToken(messaging, {
           vapidKey: 'BNOd40yGdGsvTGUAvw5Jx9iIch5lEW7m1eflUakxtmElGM9VqJVylHJymoJi8yjLwQCWM29yBsM8tFFa2SIcQ04',
         });
-        console.log('FCM Token:', token);       
+
         if (token) {
           await setDoc(doc(db, 'admin_tokens', user.uid), { token }, { merge: true });
-          console.log('✅ Admin FCM token saved.');
+          console.log('✅ FCM token saved');
         }
       } catch (err) {
-        console.error('Failed to get FCM token:', err);
+        console.error('FCM token error:', err);
       }
     };
 
     registerAdminToken();
   }, [user, isAdmin, authLoading]);
 
-  // 📩 Listen for foreground notifications
+  // 📩 Foreground notification listener
   useEffect(() => {
-    onMessage(messaging, (payload) => {
-      console.log('📥 FCM Message received:', payload);
+    const unsubscribe = onMessage(messaging, (payload) => {
+      console.log('📥 Foreground FCM:', payload);
       const { title, body } = payload.notification || {};
-
-      if (title && body) {
-        new Notification(title, { body });
-      }
+      if (title && body) new Notification(title, { body });
     });
+
+    return () => unsubscribe(); // cleanup
   }, []);
 
-  // 📦 Listen to bookings collection
+  // 📦 Fetch bookings in real-time
   useEffect(() => {
     if (authLoading) return;
 
@@ -76,16 +75,18 @@ const AdminBookings = () => {
     const unsubscribe = onSnapshot(
       collection(db, 'bookings'),
       (snapshot) => {
-        const data = snapshot.docs.map((doc, i) => ({
-          id: doc.id,
-          ...doc.data(),
-          index: i + 1,
-        }));
-        setBookings(data);
+        const data = snapshot.docs.map((doc, index) => {
+          const booking = doc.data();
+          return {
+            id: doc.id,
+            index: index + 1,
+            ...booking,
+          };
+        });
 
-        const initial = {};
+        const initialValues = {};
         data.forEach((b) => {
-          initial[b.id] = {
+          initialValues[b.id] = {
             distance: b.distance || '',
             duration: b.duration || '',
             cost: b.cost || '',
@@ -96,11 +97,12 @@ const AdminBookings = () => {
           };
         });
 
-        setEditValues(initial);
+        setBookings(data);
+        setEditValues(initialValues);
         setLoading(false);
       },
       (err) => {
-        console.error('Error listening to bookings:', err);
+        console.error('Bookings fetch error:', err);
         setError('Failed to load bookings.');
         setLoading(false);
       }
@@ -109,6 +111,7 @@ const AdminBookings = () => {
     return () => unsubscribe();
   }, [user, isAdmin, authLoading]);
 
+  // 🗑️ Handle deletion
   const handleDelete = async (id) => {
     if (window.confirm('Delete this booking permanently?')) {
       try {
@@ -197,7 +200,7 @@ const AdminBookings = () => {
                   setEditValues={setEditValues}
                   expandedId={expandedId}
                   setExpandedId={setExpandedId}
-                  fetchBookings={() => {}} // ✅ No-op function to prevent errors
+                  fetchBookings={() => {}}
                   handleDelete={handleDelete}
                 />
               ))}

@@ -1,107 +1,110 @@
-import { db } from './firebase';
-import { serverTimestamp } from 'firebase/firestore';
-import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+import {
+  addDoc,
+  collection,
+  serverTimestamp,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
+import { db } from "./firebase";
+import { generateBookingId } from "../utils/generateBookingId";
 
-function validatePlace(place, fieldName) {
-  if (
-    !place ||
-    typeof place !== 'object' ||
-    typeof place.placeId !== 'string' ||
-    typeof place.displayName !== 'string' ||
-    typeof place.lat !== 'number' ||
-    typeof place.lng !== 'number'
-  ) {
-    throw new Error(`Missing or invalid Place object: ${fieldName}`);
-  }
-}
-
-// Utility to get Place result from <gmpx-placeautocomplete>
-async function getPlaceData(elementRef) {
-  const node = elementRef?.current?.querySelector('gmpx-placeautocomplete');
-  if (!node || !node.value) throw new Error('Place not selected');
-
-  const placePrediction = node.value;
-  const place = placePrediction.toPlace();
-  await place.fetchFields({ fields: ['id', 'displayName', 'location'] });
-
+/**
+ * Safely extracts and flattens place details from the Google Places API (New).
+ * 
+ * @param {Object} place - Place object returned from <gmpx-placeautocomplete>
+ * @returns {Object} - Flattened and serializable place info
+ */
+function extractPlaceDetails(place) {
   return {
-    placeId: place.id,
-    displayName: place.displayName?.text || '',
-    lat: place.location?.latitude,
-    lng: place.location?.longitude,
+    displayName: place.displayName || '',
+    formattedAddress: place.formattedAddress || '',
+    placeId: place.id || '',
+    location: {
+      lat: typeof place?.location?.lat === 'function' ? place.location.lat() : null,
+      lng: typeof place?.location?.lng === 'function' ? place.location.lng() : null,
+    },
+    addressComponents: place?.addressComponents || [],
+    types: place?.types || [],
+    plusCode: place?.plusCode || null,
+    businessStatus: place?.businessStatus || null,
   };
 }
 
-export default async function submitBooking({
-  tripType,
-  sourceRef,
-  destinationRef,
-  date,
-  returnDate,
-  returnDistance,
-  vehicleType,
-  cost,
-  distance,
-  duration,
-  name,
-  phone,
-  userId,
-  userEmail,
-}) {
-  try {
-    const source = await getPlaceData(sourceRef);
-    const destination = await getPlaceData(destinationRef);
+export default async function submitBooking(data) {
+  const {
+    tripType,
+    date,
+    returnDate,
+    source,
+    destination,
+    vehicleType,
+    cost,
+    distance,
+    duration,
+    name,
+    phone,
+    userId,
+    userEmail,
+  } = data;
 
-    validatePlace(source, 'source');
-    validatePlace(destination, 'destination');
-
-    const bookingsRef = collection(db, 'bookings');
-
-    // Prevent duplicate bookings
-    const q = query(
-      bookingsRef,
-      where('phone', '==', phone),
-      where('date', '==', date),
-      where('source.displayName', '==', source.displayName),
-      where('destination.displayName', '==', destination.displayName)
-    );
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) {
-      throw new Error('Booking already exists for this trip.');
-    }
-
-    const newBooking = {
-      tripType,
-      source: {
-        placeId: source.placeId,
-        displayName: source.displayName,
-        latitude: source.lat,
-        longitude: source.lng,
-      },
-      destination: {
-        placeId: destination.placeId,
-        displayName: destination.displayName,
-        latitude: destination.lat,
-        longitude: destination.lng,
-      },
-      date,
-      returnDate: tripType === 'round' ? returnDate : null,
-      returnDistance: tripType === 'round' ? returnDistance : null,
-      vehicleType,
-      cost,
-      distance,
-      duration,
-      name,
-      phone,
-      userId,
-      userEmail,
-      createdAt: serverTimestamp(),
-      status: 'pending',
-    };
-
-    await addDoc(bookingsRef, newBooking);
-  } catch (error) {
-    console.error('❌ submitBooking error:', error.message);
-    throw error;
+  if (!source || !destination) {
+    throw new Error("Source or destination not provided.");
   }
+
+  const extractedSource = extractPlaceDetails(source);
+  const extractedDestination = extractPlaceDetails(destination);
+
+  const {
+    displayName: sourceDisplayName,
+    location: { lat: sourceLat, lng: sourceLng },
+  } = extractedSource;
+  const {
+    displayName: destinationDisplayName,
+    location: { lat: destLat, lng: destLng },
+  } = extractedDestination;
+
+  if (
+    !sourceDisplayName || !destinationDisplayName ||
+    typeof sourceLat !== "number" || typeof sourceLng !== "number" ||
+    typeof destLat !== "number" || typeof destLng !== "number"
+  ) {
+    throw new Error("Incomplete or invalid source/destination location.");
+  }
+
+  const bookingQuery = query(
+    collection(db, "bookings"),
+    where("phone", "==", phone),
+    where("date", "==", date),
+    where("source.displayName", "==", sourceDisplayName),
+    where("destination.displayName", "==", destinationDisplayName)
+  );
+
+  const existing = await getDocs(bookingQuery);
+  if (!existing.empty) {
+    throw new Error("Booking already exists for these details.");
+  }
+
+  const bookingId = generateBookingId(name, phone);
+
+  const bookingEntry = {
+    bookingId,
+    tripType,
+    date,
+    returnDate: tripType === "round" ? returnDate : null,
+    source: extractedSource,
+    destination: extractedDestination,
+    vehicleType,
+    cost,
+    distance,
+    duration,
+    name,
+    phone,
+    userId,
+    userEmail,
+    status: "pending",
+    createdAt: serverTimestamp(),
+  };
+
+  await addDoc(collection(db, "bookings"), bookingEntry);
 }

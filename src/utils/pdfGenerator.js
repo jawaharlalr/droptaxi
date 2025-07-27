@@ -53,7 +53,7 @@ export const generateInvoicePDF = (booking) => {
   // Table 1 – Trip Summary
   autoTable(doc, {
     startY: 62,
-    head: [['From', 'To', 'Distance (km)', 'Duration', 'Details']],
+    head: [['From', 'To', 'Distance (km)', 'Duration', 'Base + Driver Beta']],
     body: [
       [
         booking.source,
