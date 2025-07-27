@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-export const generateInvoicePDF = (booking) => {
+export const generateInvoicePDF = (booking, headerImageBase64) => {
   const doc = new jsPDF();
 
   const toNum = (n) => (!isNaN(+n) ? +n : 0);
@@ -26,41 +26,56 @@ export const generateInvoicePDF = (booking) => {
 
   const durationText = formatDuration(duration);
 
-  // ===== HEADER =====
+  // ===== HEADER BACKGROUND =====
+  const headerHeight = 40;
+  doc.setFillColor(0, 0, 0);
+  doc.rect(0, 0, 215, headerHeight, 'F');
+
+  // ===== LOGO ON LEFT (original size) =====
+  const logoWidth = 30;  // Original width
+  const logoHeight = 40; // Original height
+  const logoX = 46;
+  const logoY = 0;
+  doc.addImage(headerImageBase64, 'PNG', logoX, logoY, logoWidth, logoHeight);
+
+  // ===== HEADER TEXT (centered) =====
+  doc.setTextColor(255, 255, 255);
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
-  doc.text('Pranav Drop Taxi', 105, 16, { align: 'center' });
+  doc.text('Pranav Drop Taxi', 105, 17, { align: 'center' });
 
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
-  doc.text('Phone: +91 98849 49171', 105, 22, { align: 'center' });
-  doc.text('GST No: 33XXXXXXXXXXZ5', 105, 28, { align: 'center' });
+  doc.text('Phone: +91 98849 49171', 105, 25, { align: 'center' });
+  doc.text('GST No: 33XXXXXXXXXXZ5', 105, 30, { align: 'center' });
+
+  doc.setTextColor(0, 0, 0); // Reset text color to black
 
   // ===== Booking Info (Left) =====
   doc.setFontSize(10);
-  doc.text(`Booking ID: ${booking.bookingId || booking.id}`, 14, 36);
-  doc.text(`Customer Name: ${booking.name || '-'}`, 14, 42);
-  doc.text(`Phone: ${booking.phone || '-'}`, 14, 48);
-  doc.text(`Invoice Date: ${new Date().toLocaleDateString()}`, 14, 54);
+  const contentStartY = 46;
+  doc.text(`Booking ID: ${booking.bookingId || booking.id}`, 14, contentStartY);
+  doc.text(`Customer Name: ${booking.name || '-'}`, 14, contentStartY + 6);
+  doc.text(`Phone: ${booking.phone || '-'}`, 14, contentStartY + 12);
+  doc.text(`Invoice Date: ${new Date().toLocaleDateString()}`, 14, contentStartY + 18);
 
   // ===== Trip Info (Right) =====
   const rightX = 140;
-  doc.text(`Trip Type: ${isRound ? 'Round Trip' : 'One Way'}`, rightX, 36);
-  doc.text(`Journey Date: ${formatDate(booking.date)}`, rightX, 42);
+  doc.text(`Trip Type: ${isRound ? 'Round Trip' : 'One Way'}`, rightX, contentStartY);
+  doc.text(`Journey Date: ${formatDate(booking.date)}`, rightX, contentStartY + 6);
   if (isRound) {
-    doc.text(`Return Date: ${formatDate(booking.returnDate)}`, rightX, 48);
-    doc.text(`Trip Days: ${noOfDays}`, rightX, 54);
+    doc.text(`Return Date: ${formatDate(booking.returnDate)}`, rightX, contentStartY + 12);
+    doc.text(`Trip Days: ${noOfDays}`, rightX, contentStartY + 18);
   }
 
   // ===== Table 1: Trip Summary =====
   autoTable(doc, {
-    startY: 62,
+    startY: contentStartY + 28,
     head: [['From', 'To', 'Distance', 'Duration', 'Base Fare + Driver Bata']],
     body: [
       [
         booking.source?.displayName || booking.source?.formattedAddress || '-',
         booking.destination?.displayName || booking.destination?.formattedAddress || '-',
-
         `${distance} km`,
         durationText,
         `${formatRs(baseCost)} + ${formatRs(driverBataPerDay)} × ${noOfDays} = ${formatRs(driverBataTotal)}`
@@ -129,44 +144,7 @@ export const generateInvoicePDF = (booking) => {
   doc.setFont('helvetica', 'italic');
   doc.text(`Thank you, ${booking.name || 'Customer'}!`, 105, afterExtrasY + 20, { align: 'center' });
 
-  // ===== Page 2: Terms & Conditions =====
-  doc.addPage();
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Terms & Conditions:', 14, 20);
-
-  const terms = [
-    '1. Driver Bata is Rs. 400 per day for outstation trips.',
-    '2. Toll, Parking, Permit, and Hill charges are extra (actuals).',
-    '3. Additional kms/hours are chargeable separately.',
-    '4. Each calendar day counts as one trip day.',
-    '5. Booking is valid only after confirmation from our team.',
-    '6. In case of unavailability, a similar or better vehicle will be arranged.',
-    '7. Prices are subject to seasonal, fuel, and route changes.',
-  ];
-
-  doc.setFont('helvetica', 'normal');
-  terms.forEach((point, i) => {
-    doc.text(point, 14, 28 + i * 8);
-  });
-
-  const safetyStartY = 28 + terms.length * 8 + 10;
-  doc.setFont('helvetica', 'bold');
-  doc.text('Safety & Belongings:', 14, safetyStartY);
-
-  doc.setFont('helvetica', 'normal');
-  doc.text(
-    'Passengers are responsible for their belongings. Check before exiting.',
-    14,
-    safetyStartY + 8
-  );
-  doc.text(
-    'We are not liable for lost or forgotten items.',
-    14,
-    safetyStartY + 16
-  );
-
-  // Save PDF
+  // ===== Save PDF =====
   const fileName = `${booking.bookingId || booking.id || 'invoice'}.pdf`;
   doc.save(fileName);
 };

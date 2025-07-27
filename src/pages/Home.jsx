@@ -69,7 +69,7 @@ function Home() {
             className="w-full max-w-3xl p-6 mx-auto bg-black/80 rounded-xl sm:p-10"
           >
             <h1 className="mb-6 text-3xl font-extrabold text-yellow-300 sm:text-5xl drop-shadow-lg">
-              Welcome to DropTaxi
+              Welcome to Pranav Drop Taxi
             </h1>
             <p className="mb-6 text-base text-gray-100 sm:text-xl">
               Book your ride easily and travel comfortably with us!

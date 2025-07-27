@@ -61,6 +61,24 @@ const BookingRow = ({
     }
   };
 
+  const handleGenerateInvoice = async () => {
+    try {
+      const response = await fetch('/header.png');
+      const blob = await response.blob();
+      const reader = new FileReader();
+
+      reader.onloadend = () => {
+        const base64Image = reader.result;
+        generateInvoicePDF(b, base64Image);
+      };
+
+      reader.readAsDataURL(blob);
+    } catch (err) {
+      console.error('❌ Failed to load header image:', err);
+      alert('Failed to load header image for invoice.');
+    }
+  };
+
   return (
     <>
       <tr className="border-b hover:bg-gray-50">
@@ -121,7 +139,7 @@ const BookingRow = ({
 
           {b.status === 'completed' && (
             <button
-              onClick={() => generateInvoicePDF(b)}
+              onClick={handleGenerateInvoice}
               className="flex items-center justify-center w-full gap-1 px-2 py-1 text-xs font-medium text-white bg-green-600 rounded hover:bg-green-700"
             >
               <FiFileText /> Create Invoice
