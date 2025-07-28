@@ -113,7 +113,7 @@ function Home() {
 
         {/* Why Choose Us */}
         <section className="px-4 py-16 text-white sm:py-20">
-          <h2 className="mb-10 text-3xl font-bold text-center sm:text-4xl">Why Choose DropTaxi?</h2>
+          <h2 className="mb-10 text-3xl font-bold text-center sm:text-4xl">Why Choose Pran Drop Taxi?</h2>
           <div className="grid max-w-6xl gap-8 mx-auto sm:grid-cols-3">
             {[
               { Icon: Car, title: 'Reliable Rides', description: 'On-time pickups and clean vehicles ensure smooth travel.' },

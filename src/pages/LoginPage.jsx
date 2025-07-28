@@ -83,9 +83,11 @@ const LoginPage = () => {
 
           <form onSubmit={handleEmailLogin} className="space-y-4">
             <div>
+              
               <label className="block mb-1 font-medium text-yellow-200">Email</label>
               <input
                 type="email"
+                placeholder='Enter Your Email'
                 className="w-full px-4 py-2 text-black border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -98,6 +100,7 @@ const LoginPage = () => {
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
+                  placeholder='Enter Your Password'
                   className="w-full px-4 py-2 pr-10 text-black border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

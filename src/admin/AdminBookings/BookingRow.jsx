@@ -63,19 +63,10 @@ const BookingRow = ({
 
   const handleGenerateInvoice = async () => {
     try {
-      const response = await fetch('/header.png');
-      const blob = await response.blob();
-      const reader = new FileReader();
-
-      reader.onloadend = () => {
-        const base64Image = reader.result;
-        generateInvoicePDF(b, base64Image);
-      };
-
-      reader.readAsDataURL(blob);
+      generateInvoicePDF(b); // 🔧 Fixed version with dynamic page width
     } catch (err) {
-      console.error('❌ Failed to load header image:', err);
-      alert('Failed to load header image for invoice.');
+      console.error('❌ Failed to generate invoice:', err);
+      alert('Failed to generate invoice.');
     }
   };
 

@@ -1,38 +1,40 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../utils/firebase';
-import { motion } from 'framer-motion';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../utils/firebase";
+import { motion } from "framer-motion";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      const userDocRef = doc(db, 'users', user.uid);
+      const userDocRef = doc(db, "users", user.uid);
       const userDoc = await getDoc(userDocRef);
 
-      if (userDoc.exists() && userDoc.data().role === 'admin') {
-        navigate('/admin/dashboard');
+      if (userDoc.exists() && userDoc.data().role === "admin") {
+        navigate("/admin/dashboard");
       } else {
-        setError('Access denied: Admins only.');
+        setError("Access denied: Admins only.");
         await auth.signOut();
       }
     } catch (err) {
-      console.error('Login failed:', err);
-      setError('Invalid credentials or network error.');
+      console.error("Login failed:", err);
+      setError("Invalid credentials or network error.");
     } finally {
       setLoading(false);
     }
@@ -50,8 +52,12 @@ const AdminLogin = () => {
           transition={{ duration: 0.6 }}
           className="w-full max-w-md p-6 shadow-lg sm:p-8 bg-black/90 rounded-xl"
         >
-          <h2 className="mb-6 text-3xl font-bold text-center text-yellow-300">Admin Login</h2>
+          <h2 className="mb-6 text-3xl font-bold text-center text-yellow-300">
+            Admin Login
+          </h2>
+
           <form onSubmit={handleLogin} className="space-y-4 text-white">
+            {/* Email Input */}
             <input
               type="email"
               placeholder="Email"
@@ -60,21 +66,36 @@ const AdminLogin = () => {
               className="w-full px-4 py-2 placeholder-gray-300 bg-transparent border rounded focus:outline-none focus:ring-2 focus:ring-yellow-400"
               required
             />
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 placeholder-gray-300 bg-transparent border rounded focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              required
-            />
+
+            {/* Password Input with Toggle */}
+            <div className="relative w-full">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-2 pr-10 placeholder-gray-300 bg-transparent border rounded focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 flex items-center text-gray-500 right-3"
+              >
+                {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+              </button>
+            </div>
+
+            {/* Error Message */}
             {error && <p className="text-sm text-red-500">{error}</p>}
+
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
               className="w-full py-2 font-semibold text-black transition bg-yellow-400 rounded hover:bg-yellow-300"
             >
-              {loading ? 'Logging in...' : 'Login'}
+              {loading ? "Logging in..." : "Login"}
             </button>
           </form>
         </motion.div>
