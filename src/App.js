@@ -20,6 +20,7 @@ import AdminDashboard from './admin/AdminDashboard';
 import AdminLogin from './admin/AdminLogin';
 import ManageUsers from './admin/ManageUsers';
 import AdminBookings from './admin/AdminBookings/AdminBookings';
+import AdminReviews from './admin/AdminReviews';
 
 import { AuthProvider } from './utils/AuthContext';
 import AdminSidebar from './components/AdminSidebar';
@@ -83,6 +84,7 @@ function App() {
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="users" element={<ManageUsers />} />
               <Route path="bookings" element={<AdminBookings />} />
+              <Route path="/admin/reviews" element={<AdminReviews />} />
               <Route index element={<AdminDashboard />} /> {/* optional redirect */}
             </Route>
           </Routes>

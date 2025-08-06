@@ -4,15 +4,11 @@ import {
   onSnapshot,
   deleteDoc,
   doc,
-  setDoc,
 } from 'firebase/firestore';
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { db } from '../../utils/firebase';
 import { useAuth } from '../../utils/AuthContext';
 import BookingRow from './BookingRow';
 import { Link } from 'react-router-dom';
-
-const messaging = getMessaging();
 
 const AdminBookings = () => {
   const { user, isAdmin, loading: authLoading } = useAuth();
@@ -22,45 +18,6 @@ const AdminBookings = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  // 🔔 Register admin token for push notifications
-  useEffect(() => {
-    if (authLoading || !user || !isAdmin) return;
-
-    const registerAdminToken = async () => {
-      try {
-        const permission = await Notification.requestPermission();
-        if (permission !== 'granted') {
-          console.warn('Notification permission denied');
-          return;
-        }
-
-        const token = await getToken(messaging, {
-          vapidKey: 'BNOd40yGdGsvTGUAvw5Jx9iIch5lEW7m1eflUakxtmElGM9VqJVylHJymoJi8yjLwQCWM29yBsM8tFFa2SIcQ04',
-        });
-
-        if (token) {
-          await setDoc(doc(db, 'admin_tokens', user.uid), { token }, { merge: true });
-          console.log('✅ FCM token saved');
-        }
-      } catch (err) {
-        console.error('FCM token error:', err);
-      }
-    };
-
-    registerAdminToken();
-  }, [user, isAdmin, authLoading]);
-
-  // 📩 Foreground notification listener
-  useEffect(() => {
-    const unsubscribe = onMessage(messaging, (payload) => {
-      console.log('📥 Foreground FCM:', payload);
-      const { title, body } = payload.notification || {};
-      if (title && body) new Notification(title, { body });
-    });
-
-    return () => unsubscribe(); // cleanup
-  }, []);
 
   // 📦 Fetch bookings in real-time
   useEffect(() => {
@@ -122,7 +79,7 @@ const AdminBookings = () => {
     }
   };
 
-  if (authLoading) return <p className="mt-10 text-center">Checking access…</p>;
+  if (authLoading) return <p className="mt-10 text-center text-white">Checking access…</p>;
 
   const filteredBookings =
     statusFilter === 'all'
@@ -144,20 +101,20 @@ const AdminBookings = () => {
   ];
 
   return (
-    <div className="min-h-screen p-6 mx-auto text-black bg-white max-w-7xl">
+    <div className="min-h-screen p-6 mx-auto text-white bg-black max-w-7xl">
       <div className="flex flex-col items-start justify-between gap-4 mb-6 sm:flex-row sm:items-center">
         <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
-          <h2 className="text-3xl font-bold">Manage Bookings</h2>
+          <h2 className="text-3xl font-bold text-yellow-400">Manage Bookings</h2>
           <Link
             to="/admin/dashboard"
-            className="inline-block px-4 py-2 mt-2 text-sm font-medium text-black transition bg-white border border-black rounded sm:mt-0 hover:bg-black hover:text-white"
+            className="inline-block px-4 py-2 mt-2 text-sm font-medium text-yellow-300 transition border border-yellow-400 rounded sm:mt-0 hover:bg-yellow-400 hover:text-black"
           >
             Dashboard
           </Link>
         </div>
 
         <select
-          className="p-2 text-sm border border-gray-300 rounded"
+          className="p-2 text-sm text-black bg-white border border-gray-300 rounded"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
         >
@@ -170,15 +127,15 @@ const AdminBookings = () => {
       </div>
 
       {loading ? (
-        <p>Loading bookings…</p>
+        <p className="text-gray-200">Loading bookings…</p>
       ) : error ? (
-        <div className="p-4 text-red-700 bg-red-100 rounded">{error}</div>
+        <div className="p-4 text-red-300 border border-red-500 rounded bg-red-900/30">{error}</div>
       ) : filteredBookings.length === 0 ? (
-        <p>No bookings found for selected status.</p>
+        <p className="text-gray-400">No bookings found for selected status.</p>
       ) : (
-        <div className="overflow-auto border border-gray-300 rounded">
-          <table className="min-w-full text-sm text-left text-black bg-white">
-            <thead className="text-xs font-semibold uppercase bg-gray-100 border-b">
+        <div className="overflow-auto border border-yellow-400 rounded">
+          <table className="min-w-full text-sm text-left text-white bg-black">
+            <thead className="text-xs font-semibold text-black uppercase bg-yellow-500">
               <tr>
                 <th className="px-3 py-2">S.No</th>
                 <th className="px-3 py-2">Name</th>

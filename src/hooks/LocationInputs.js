@@ -35,6 +35,15 @@ const LocationInputs = ({
             fields: ['displayName', 'location', 'formattedAddress'],
           });
 
+          const addressText = `${place.displayName || ''}, ${place.formattedAddress || ''}`.toLowerCase();
+
+          // Block Chennai
+          if (addressText.includes('chennai')) {
+            alert('Please select a location outside Chennai.');
+            input.clear(); // optional: clears the field
+            return;
+          }
+
           const lat =
             typeof place.location?.lat === 'function'
               ? place.location.lat()

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiMenu, FiX, FiMapPin, FiPhone } from 'react-icons/fi';
+import { FiMenu, FiX, FiMapPin } from 'react-icons/fi';
 import { useAuth } from '../utils/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -47,17 +48,12 @@ const Navbar = () => {
           <FiMapPin size={14} />
           Office Location
         </a>
-        <span className="mx-2 text-gray-600">|</span>
-        <a href="tel:+919884609789" className="flex items-center gap-1 hover:underline">
-          <FiPhone size={14} />
-          +91 9884609789
-        </a>
       </div>
 
       {/* 🔸 Main Navbar */}
       <nav className="sticky z-50 px-6 text-white bg-black shadow-sm top-10 md:top-0 backdrop-blur">
         <div className="container flex items-center justify-between h-16 mx-auto md:h-[72px]">
-          {/* 🔸 Logo */}
+          {/* Logo */}
           <Link to="/" className="text-xl font-bold">
             <img
               src="/header.png"
@@ -66,7 +62,7 @@ const Navbar = () => {
             />
           </Link>
 
-          {/* 🔸 Desktop Menu */}
+          {/* Desktop Menu */}
           <div className="items-center hidden gap-6 text-white md:flex">
             <Link to="/my-bookings" className="transition hover:text-yellow-300">My Bookings</Link>
             <Link to="/about" className="transition hover:text-yellow-300">About Us</Link>
@@ -80,22 +76,36 @@ const Navbar = () => {
                   className="object-cover w-10 h-10 transition border-2 border-yellow-300 rounded-full cursor-pointer hover:scale-105"
                   onClick={() => setDropdownOpen(!dropdownOpen)}
                 />
-                {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 bg-white text-black border rounded shadow min-w-[180px] z-10">
-                    <div className="px-4 py-2 text-sm border-b">{user.email}</div>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
+                <AnimatePresence>
+                  {dropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute right-0 z-20 w-64 mt-3 bg-black border border-yellow-400 shadow-xl rounded-xl"
                     >
-                      Logout
-                    </button>
-                  </div>
-                )}
+                      <div className="px-4 py-3 border-b border-yellow-400 space-y-0.5">
+                        <p className="text-sm text-gray-200">Signed in as</p>
+                        <p className="text-sm font-semibold text-yellow-300 truncate">
+                          {user.displayName || 'Guest User'}
+                        </p>
+                        <p className="text-sm text-gray-400 truncate">{user.email}</p>
+                      </div>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full px-4 py-3 text-sm text-left text-white transition hover:bg-yellow-400 hover:text-black rounded-b-xl"
+                      >
+                        Logout
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )}
           </div>
 
-          {/* 🔸 Mobile Menu Button & Profile */}
+          {/* Mobile Menu Toggle & Profile */}
           <div className="flex items-center gap-3 md:hidden">
             <Link to="/my-bookings" className="text-sm font-medium hover:text-yellow-300">My Bookings</Link>
 
@@ -107,17 +117,31 @@ const Navbar = () => {
                   className="object-cover border-2 border-yellow-300 rounded-full cursor-pointer w-9 h-9"
                   onClick={() => setDropdownOpen(!dropdownOpen)}
                 />
-                {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 bg-white text-black border rounded shadow min-w-[180px] z-10">
-                    <div className="px-4 py-2 text-sm border-b">{user.email}</div>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
+                <AnimatePresence>
+                  {dropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute right-0 z-20 w-64 mt-3 bg-black border border-yellow-400 shadow-xl rounded-xl"
                     >
-                      Logout
-                    </button>
-                  </div>
-                )}
+                      <div className="px-4 py-3 border-b border-yellow-400 space-y-0.5">
+                        <p className="text-sm text-gray-200">Signed in as</p>
+                        <p className="text-sm font-semibold text-yellow-300 truncate">
+                          {user.displayName || 'Guest User'}
+                        </p>
+                        <p className="text-sm text-gray-400 truncate">{user.email}</p>
+                      </div>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full px-4 py-3 text-sm text-left text-white transition hover:bg-yellow-400 hover:text-black rounded-b-xl"
+                      >
+                        Logout
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )}
 
@@ -127,7 +151,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* 🔸 Mobile Menu Links */}
+        {/* Mobile Menu Links */}
         {menuOpen && (
           <div className="flex flex-col gap-4 px-6 py-4 text-white bg-black/90 md:hidden">
             <Link to="/about" onClick={() => setMenuOpen(false)} className="hover:text-yellow-300">About Us</Link>

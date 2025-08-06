@@ -141,7 +141,6 @@ function Home() {
             <p className="text-center text-gray-300">No reviews yet.</p>
           ) : (
             <div className="relative flex flex-col items-center max-w-6xl mx-auto">
-              
               {/* Mobile Top Arrows */}
               <div className="flex items-center justify-between w-full mb-4 sm:hidden">
                 <button

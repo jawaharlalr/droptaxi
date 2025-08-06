@@ -5,10 +5,12 @@ import AdminSidebar from './AdminSidebar';
 
 const AdminLayout = () => {
   return (
-    <div className="flex min-h-screen text-black bg-white">
+    <div className="flex min-h-screen text-white bg-black">
       <AdminSidebar />
-      <main className="flex-1 p-4 bg-gray-50">
-        <Outlet />
+      <main className="flex-1 p-6 overflow-auto bg-black">
+        <div className="mx-auto max-w-7xl">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

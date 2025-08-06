@@ -15,6 +15,7 @@ const BookingRow = ({
   handleDelete,
 }) => {
   const toNum = (n) => (+n ? +n : 0);
+
   const formatDate = (d) => {
     if (!d) return '-';
     const dateObj = d?.toDate?.() || new Date(d);
@@ -63,28 +64,39 @@ const BookingRow = ({
 
   const handleGenerateInvoice = async () => {
     try {
-      generateInvoicePDF(b); // 🔧 Fixed version with dynamic page width
+      generateInvoicePDF(b);
     } catch (err) {
       console.error('❌ Failed to generate invoice:', err);
       alert('Failed to generate invoice.');
     }
   };
 
+  const getFareColor = () => {
+    switch (b.status) {
+      case 'completed':
+        return 'text-green-500';
+      case 'confirmed':
+        return 'text-yellow-500';
+      default:
+        return 'text-red-500';
+    }
+  };
+
   return (
     <>
-      <tr className="border-b hover:bg-gray-50">
-        <td className="px-3 py-2">{b.index}</td>
+      <tr className="text-white transition bg-black border-b border-yellow-500">
+        <td className="px-3 py-2 text-sm font-semibold">{b.index}</td>
 
         <td className="px-3 py-2">
           <div className="text-sm font-medium">{b.name}</div>
-          {b.bookingId && <div className="text-xs text-gray-500">ID: {b.bookingId}</div>}
+          {b.bookingId && <div className="text-xs text-gray-400">ID: {b.bookingId}</div>}
         </td>
 
         <td className="px-3 py-2">{b.phone}</td>
 
         <td className="px-3 py-2">
           <div>{b.source?.displayName || '-'}</div>
-          <div className="text-xs text-center text-gray-500">to</div>
+          <div className="text-xs text-center text-gray-400">to</div>
           <div>{b.destination?.displayName || '-'}</div>
         </td>
 
@@ -93,7 +105,7 @@ const BookingRow = ({
           <div><b>Type:</b> {isRoundTrip ? 'Round Trip' : 'One Way'}</div>
           <div><b>Journey:</b> {formatDate(b.date)}</div>
           {isRoundTrip && <div><b>Return:</b> {formatDate(b.returnDate)}</div>}
-          <div><b>Bata:</b> Rs {DRIVER_BATA_PER_DAY} × {noOfDays} day{noOfDays > 1 ? 's' : ''}</div>
+          <div><b>Bata:</b> ₹{DRIVER_BATA_PER_DAY} × {noOfDays} day{noOfDays > 1 ? 's' : ''}</div>
         </td>
 
         <td className="px-3 py-2">{b.vehicleType}</td>
@@ -102,7 +114,7 @@ const BookingRow = ({
           <select
             value={b.status || ''}
             onChange={(e) => updateStatus(e.target.value)}
-            className="px-2 py-1 text-xs border rounded"
+            className="px-2 py-1 text-xs text-black bg-yellow-100 border border-yellow-300 rounded"
           >
             <option value="">Pending</option>
             <option value="confirmed">Confirmed</option>
@@ -111,12 +123,14 @@ const BookingRow = ({
           </select>
         </td>
 
-        <td className="px-3 py-2 font-semibold text-blue-700">Rs {b.totalCost || totalCost}</td>
+        <td className={`px-3 py-2 font-semibold ${getFareColor()}`}>
+          ₹{b.totalCost || totalCost}
+        </td>
 
         <td className="px-3 py-2 space-y-1">
           <button
             onClick={() => setExpandedId(isExpanded ? null : b.id)}
-            className="flex items-center justify-center w-full gap-1 px-2 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700"
+            className="flex items-center justify-center w-full gap-1 px-2 py-1 text-xs font-medium text-black bg-yellow-400 rounded hover:bg-yellow-500"
           >
             {isExpanded ? <FiChevronUp /> : <FiChevronDown />} {isExpanded ? 'Collapse' : 'Expand'}
           </button>

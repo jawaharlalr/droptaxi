@@ -1,3 +1,5 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   PhoneCall,
   Mail,
@@ -7,17 +9,35 @@ import {
   UserCheck,
   CarFront,
   CheckCircle2,
+  ArrowUp,
+  Home,
 } from 'lucide-react';
 
 export default function TermsAndConditions() {
+  const navigate = useNavigate();
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
-    <main className="flex items-center justify-center min-h-screen px-4 py-12 text-white bg-black">
-      <section className="w-full max-w-5xl p-8 shadow-lg bg-black/80 rounded-2xl md:p-12">
-        <h2 className="flex items-center justify-center gap-2 mb-10 text-3xl font-bold text-yellow-300">
+    <main className="flex flex-col items-center min-h-screen px-4 py-12 text-white bg-black">
+      {/* Page Header with Home Button */}
+      <div className="flex justify-between w-full max-w-5xl mb-6">
+        <h2 className="flex items-center gap-2 text-3xl font-bold text-yellow-300">
           <ShieldCheck className="w-7 h-7" />
           Terms and Conditions
         </h2>
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-black transition bg-yellow-400 rounded hover:bg-yellow-300"
+        >
+          <Home className="w-4 h-4" />
+          Home
+        </button>
+      </div>
 
+      <section className="w-full max-w-5xl p-6 shadow-lg md:p-12 bg-black/80 rounded-2xl">
         <div className="space-y-8 text-base leading-relaxed text-white/80">
           {/* 1 */}
           <div>
@@ -58,9 +78,7 @@ export default function TermsAndConditions() {
               <AlertTriangle className="w-5 h-5 mr-2 text-red-500" />
               4. Cancellations
             </h3>
-            <p>
-              Cancel free up to 2 days before pickup. Late cancellations may incur a fee.
-            </p>
+            <p>Cancel free up to 2 days before pickup. Late cancellations may incur a fee.</p>
           </div>
 
           {/* 5 */}
@@ -147,6 +165,17 @@ export default function TermsAndConditions() {
               </a>
             </p>
           </div>
+        </div>
+
+        {/* Back to Top Button at Bottom */}
+        <div className="flex justify-center mt-10">
+          <button
+            onClick={scrollToTop}
+            className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-black transition bg-yellow-400 rounded-full hover:bg-yellow-300"
+          >
+            <ArrowUp className="w-4 h-4" />
+            Back to Top
+          </button>
         </div>
       </section>
     </main>

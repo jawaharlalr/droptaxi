@@ -1,5 +1,5 @@
 import React from 'react';
-import clsx from 'clsx'; // Make sure clsx is installed: npm install clsx
+import clsx from 'clsx';
 
 const vehicleOptions = [
   {
@@ -27,7 +27,7 @@ const vehicleOptions = [
 
 const VehicleSelector = ({ vehicleType, setVehicleType, tripType }) => {
   return (
-    <div className="grid sm:grid-cols-3 gap-3">
+    <div className="flex flex-wrap justify-between gap-2 sm:gap-3">
       {vehicleOptions.map((v) => {
         const isSelected = vehicleType === v.type;
         const rate = v.pricing[tripType] ?? v.pricing.oneway;
@@ -38,19 +38,19 @@ const VehicleSelector = ({ vehicleType, setVehicleType, tripType }) => {
             key={v.type}
             onClick={() => setVehicleType(v.type)}
             className={clsx(
-              'cursor-pointer border rounded-md p-3 bg-gray-800 text-white transition hover:shadow-md text-center',
+              'flex-1 min-w-[30%] max-w-[32%] cursor-pointer border rounded-md px-2 py-3 bg-gray-800 text-white transition hover:shadow-md text-center sm:min-w-0',
               isSelected ? 'border-yellow-400 ring-2 ring-yellow-400' : 'border-gray-700'
             )}
           >
             <img
               src={v.image}
               alt={v.label}
-              className="h-16 max-w-[80px] mx-auto object-contain mb-2"
+              className="object-contain h-12 mx-auto mb-2"
             />
-            <h3 className="text-base font-semibold mb-1 text-yellow-300">
+            <h3 className="mb-1 text-sm font-semibold text-yellow-300">
               {v.label}
             </h3>
-            <p className="text-sm text-gray-300 mb-1">
+            <p className="mb-1 text-xs text-gray-300">
               ₹{rate}/km ({tripType === 'roundtrip' ? 'Round Trip' : 'One Way'})
             </p>
             <p className="text-xs text-gray-400">Min {minKm} km</p>

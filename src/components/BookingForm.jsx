@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, AlertTriangle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import TripTypeSelector from "./BookingForm/TripTypeSelector";
 import DateTimePicker from "./BookingForm/DateTimePicker";
@@ -16,6 +16,9 @@ import useDistanceCalculator from "../hooks/useDistanceCalculator";
 import submitBooking from "../utils/submitBooking";
 
 const BookingForm = () => {
+  const location = useLocation();
+  const rebookState = location.state;
+
   const [tripType, setTripType] = useState("oneway");
   const [date, setDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
@@ -48,6 +51,15 @@ const BookingForm = () => {
     vehicleType,
     tripType,
   }) || {};
+
+  useEffect(() => {
+    if (rebookState) {
+      if (rebookState.tripType) setTripType(rebookState.tripType);
+      if (rebookState.vehicleType) setVehicleType(rebookState.vehicleType);
+      if (rebookState.source) setSourcePlace(rebookState.source);
+      if (rebookState.destination) setDestinationPlace(rebookState.destination);
+    }
+  }, [rebookState]);
 
   const validatePlace = (place, label) => {
     try {

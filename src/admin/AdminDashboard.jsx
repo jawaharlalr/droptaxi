@@ -1,17 +1,16 @@
-// src/pages/AdminDashboard.jsx
 import React, { useEffect, useState, useRef } from 'react';
 import { db } from '../utils/firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '../utils/AuthContext';
-import {
-  FiCheckCircle,
-  FiXCircle,
-  FiList,
-  FiTrendingUp,
-  FiArrowUpRight,
-  FiArrowDownRight,
-} from 'react-icons/fi';
 import toast, { Toaster } from 'react-hot-toast';
+import {
+  CheckCircle,
+  XCircle,
+  ListOrdered,
+  TrendingUp,
+  ArrowUpRight,
+  ArrowDownRight,
+} from 'lucide-react';
 
 const AdminDashboard = () => {
   const { user, isAdmin, loading: authLoading } = useAuth();
@@ -23,7 +22,7 @@ const AdminDashboard = () => {
     completed: 0,
     cancelled: 0,
   });
-  const [trend, setTrend] = useState(null); // up or down
+  const [trend, setTrend] = useState(null);
 
   const prevBookingCount = useRef(0);
   const audioRef = useRef(null);
@@ -52,7 +51,7 @@ const AdminDashboard = () => {
           const diff = bookings.length - prevBookingCount.current;
           if (diff > 0) {
             setTrend('up');
-            toast.success('📦 New booking received');
+            toast.success('New booking received');
             if (audioRef.current) audioRef.current.play();
           } else if (diff < 0) {
             setTrend('down');
@@ -76,34 +75,58 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="p-6">
+    <div className="min-h-screen p-6 text-white bg-black">
       <Toaster />
       <audio ref={audioRef} src="/notification.mp3" preload="auto" />
 
-      <h1 className="mb-6 text-3xl font-bold">Pranav Drop Taxi Dashboard</h1>
+      <h1 className="mb-6 text-3xl font-bold text-yellow-400">Pranav Drop Taxi Dashboard</h1>
 
       {loading ? (
-        <p>Loading booking statistics...</p>
+        <p className="text-gray-300">Loading booking statistics...</p>
       ) : error ? (
-        <div className="p-4 text-red-700 bg-red-100 border border-red-400 rounded">{error}</div>
+        <div className="p-4 text-red-300 bg-red-900 border border-red-600 rounded">{error}</div>
       ) : (
         <>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            <StatCard label="Total Bookings" count={stats.total} icon={<FiList />} color="gray" />
-            <StatCard label="Confirmed" count={stats.confirmed} icon={<FiCheckCircle />} color="green" />
-            <StatCard label="Completed" count={stats.completed} icon={<FiTrendingUp />} color="blue" />
-            <StatCard label="Cancelled" count={stats.cancelled} icon={<FiXCircle />} color="red" />
+            <StatCard
+              label="Total Bookings"
+              count={stats.total}
+              icon={<ListOrdered size={24} />}
+              color="border-yellow-400"
+              bg="bg-yellow-900"
+            />
+            <StatCard
+              label="Confirmed"
+              count={stats.confirmed}
+              icon={<CheckCircle size={24} />}
+              color="border-green-400"
+              bg="bg-green-900"
+            />
+            <StatCard
+              label="Completed"
+              count={stats.completed}
+              icon={<TrendingUp size={24} />}
+              color="border-blue-400"
+              bg="bg-blue-900"
+            />
+            <StatCard
+              label="Cancelled"
+              count={stats.cancelled}
+              icon={<XCircle size={24} />}
+              color="border-red-400"
+              bg="bg-red-900"
+            />
           </div>
 
           {trend && (
-            <div className="flex items-center mt-4 text-sm text-gray-600">
+            <div className="flex items-center mt-6 text-sm">
               {trend === 'up' ? (
-                <span className="flex items-center gap-1 text-green-600">
-                  <FiArrowUpRight /> Bookings are increasing
+                <span className="flex items-center gap-2 text-green-400">
+                  <ArrowUpRight size={18} /> Bookings are increasing
                 </span>
               ) : (
-                <span className="flex items-center gap-1 text-red-600">
-                  <FiArrowDownRight /> Bookings have decreased
+                <span className="flex items-center gap-2 text-red-400">
+                  <ArrowDownRight size={18} /> Bookings have decreased
                 </span>
               )}
             </div>
@@ -114,22 +137,15 @@ const AdminDashboard = () => {
   );
 };
 
-// 🎨 Stat card with color themes
-const StatCard = ({ label, count, icon, color }) => {
-  const colorMap = {
-    gray: 'border-gray-300',
-    green: 'border-green-400',
-    red: 'border-red-400',
-    blue: 'border-blue-400',
-  };
-
+// 🎨 Reusable stat card component
+const StatCard = ({ label, count, icon, color, bg }) => {
   return (
-    <div className={`p-4 bg-white border rounded shadow ${colorMap[color] || 'border-gray-300'}`}>
+    <div className={`p-4 rounded-lg shadow-md border ${color} ${bg}`}>
       <div className="flex items-center justify-between mb-2">
-        <span className="text-sm text-black">{label}</span>
-        <div className="text-xl text-black">{icon}</div>
+        <span className="text-sm text-yellow-200">{label}</span>
+        <div className="text-yellow-300">{icon}</div>
       </div>
-      <p className="text-2xl font-bold text-black">{count}</p>
+      <p className="text-3xl font-bold text-white">{count}</p>
     </div>
   );
 };

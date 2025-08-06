@@ -21,7 +21,6 @@ const BookingExpand = ({ b, v, editValues, setEditValues, fetchBookings }) => {
   };
 
   const saveCharges = async () => {
-    // Step 1: Update Firestore
     try {
       await updateDoc(doc(db, 'bookings', b.id), {
         distance: +v.distance,
@@ -39,7 +38,6 @@ const BookingExpand = ({ b, v, editValues, setEditValues, fetchBookings }) => {
       return;
     }
 
-    // Step 2: Refresh UI safely
     try {
       fetchBookings();
     } catch (err) {
@@ -48,18 +46,21 @@ const BookingExpand = ({ b, v, editValues, setEditValues, fetchBookings }) => {
   };
 
   return (
-    <tr className="border-b bg-gray-50">
+    <tr className="text-white bg-black border-b border-yellow-600">
       <td colSpan={9} className="px-4 py-4">
         <CostFields b={b} v={v} setEditValues={setEditValues} />
         <div className="mt-3 text-sm font-medium">
-          Calculated Total Cost: <span className="font-bold text-green-700">₹{totalCost}</span>
+          Calculated Total Cost:{' '}
+          <span className="font-bold text-yellow-400">₹{totalCost}</span>
         </div>
-        <div className="mt-2">
+        <div className="mt-3">
           <button
             onClick={saveCharges}
             disabled={!isModified()}
-            className={`px-4 py-1.5 text-white text-xs rounded ${
-              isModified() ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-default'
+            className={`px-4 py-1.5 text-sm rounded font-semibold transition ${
+              isModified()
+                ? 'bg-yellow-400 text-black hover:bg-yellow-300'
+                : 'bg-gray-600 text-gray-300 cursor-not-allowed'
             }`}
           >
             Save Fare Details
