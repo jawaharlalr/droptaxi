@@ -7,7 +7,7 @@ const DateTimePicker = ({ tripType, date, returnDate, setDate, setReturnDate }) 
     <div className="grid gap-4 sm:grid-cols-2">
       {/* Pickup Date */}
       <div className="flex flex-col">
-        <label htmlFor="pickup-date" className="text-sm mb-1 text-gray-300">
+        <label htmlFor="pickup-date" className="mb-1 text-sm text-gray-300">
           Pickup Date
         </label>
         <input
@@ -17,14 +17,14 @@ const DateTimePicker = ({ tripType, date, returnDate, setDate, setReturnDate }) 
           value={date}
           onChange={(e) => setDate(e.target.value)}
           required
-          className="w-full p-3 rounded bg-gray-800 text-white border border-gray-600"
+          className="w-full p-3 text-white bg-gray-800 border border-gray-600 rounded"
         />
       </div>
 
       {/* Return Date – only for round trip */}
       {tripType === 'roundtrip' && (
         <div className="flex flex-col">
-          <label htmlFor="return-date" className="text-sm mb-1 text-gray-300">
+          <label htmlFor="return-date" className="mb-1 text-sm text-gray-300">
             Return Date
           </label>
           <input
@@ -34,7 +34,7 @@ const DateTimePicker = ({ tripType, date, returnDate, setDate, setReturnDate }) 
             value={returnDate}
             onChange={(e) => setReturnDate(e.target.value)}
             required
-            className="w-full p-3 rounded bg-gray-800 text-white border border-gray-600"
+            className="w-full p-3 text-white bg-gray-800 border border-gray-600 rounded"
           />
         </div>
       )}
