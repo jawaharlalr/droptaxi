@@ -39,11 +39,6 @@ const Footer = () => {
                 My Bookings
               </Link>
             </li>
-            <li>
-              <Link to="/terms-and-conditions" className="inline-block transition-transform duration-200 text-white/80 hover:text-yellow-300 hover:scale-105">
-                Terms and Conditions
-              </Link>
-            </li>
           </ul>
         </div>
 

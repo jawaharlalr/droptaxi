@@ -23,7 +23,7 @@ const TripTypeSelector = ({ tripType, setTripType }) => {
       </div>
       {/* Availability note */}
       <p className="mt-1 text-red-500 text-md">
-        * We are available only in Tamil Nadu, Kerala, Andhra Pradesh And Karnataka.
+        * We are available only in Tamil Nadu, Kerala, Andhra Pradesh And Karnataka For Pickup & Drop.
       </p>
     </div>
   );

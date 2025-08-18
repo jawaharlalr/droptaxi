@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, AlertTriangle } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 import TripTypeSelector from "./BookingForm/TripTypeSelector";
 import DateTimePicker from "./BookingForm/DateTimePicker";
@@ -31,7 +31,6 @@ const BookingForm = () => {
   const [loginCompleted, setLoginCompleted] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [bookingId, setBookingId] = useState("");
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const [sourcePlace, setSourcePlace] = useState(null);
   const [destinationPlace, setDestinationPlace] = useState(null);
@@ -99,7 +98,6 @@ const BookingForm = () => {
       return "Please select a return date";
     if (!distance || !cost || !duration)
       return "Trip details not calculated yet";
-    if (!acceptedTerms) return "Please accept the Terms and Conditions";
     return "";
   };
 
@@ -145,7 +143,6 @@ const BookingForm = () => {
     setPickupError("");
     setDropError("");
     setShowSummary(false);
-    setAcceptedTerms(false);
   };
 
   const handleFinalSubmit = async () => {
@@ -258,37 +255,6 @@ const BookingForm = () => {
                 cost={cost}
                 tripType={tripType === "roundtrip" ? "round" : "single"}
               />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <AnimatePresence>
-          {showSummary && !showSuccessModal && (
-            <motion.div
-              key="terms"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex items-center gap-2 text-sm text-white"
-            >
-              <input
-                type="checkbox"
-                id="acceptTerms"
-                checked={acceptedTerms}
-                onChange={(e) => setAcceptedTerms(e.target.checked)}
-                className="w-4 h-4"
-              />
-              <label htmlFor="acceptTerms" className="flex-1">
-                I accept the{" "}
-                <Link
-                  to="/terms-and-conditions"
-                  className="text-blue-400 hover:underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Terms and Conditions
-                </Link>
-              </label>
             </motion.div>
           )}
         </AnimatePresence>

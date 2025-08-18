@@ -27,6 +27,13 @@ const LocationInputs = ({
 
         const input = new google.maps.places.PlaceAutocompleteElement({
           includedRegionCodes: ['IN'],
+          // Restrict to bounding box covering TN, Kerala, Karnataka, AP
+          locationRestriction: {
+            north: 20.0,   // top latitude (just above AP)
+            south: 8.0,    // bottom latitude (southern tip of Kerala/TN)
+            east: 85.0,    // eastern longitude (AP coast)
+            west: 74.0,    // western longitude (Kerala coast)
+          },
         });
 
         input.addEventListener('gmp-select', async ({ placePrediction }) => {
