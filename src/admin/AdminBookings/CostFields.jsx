@@ -1,7 +1,9 @@
 import React from 'react';
 
 const CostFields = ({ b, v, setEditValues }) => {
-  const inputCls = `w-full border px-2 py-1 rounded text-xs focus:outline-none focus:ring-2 focus:ring-yellow-500`;
+  // ✅ Force inputs to always have black text on white background
+  const inputCls =
+    "w-full border px-2 py-1 rounded text-xs text-black bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500";
 
   const isDisabled = b.status === 'completed';
 
@@ -67,9 +69,7 @@ const CostFields = ({ b, v, setEditValues }) => {
       {/* Cost breakdown fields */}
       {['cost', 'toll', 'parking', 'hill', 'permit'].map((key) => (
         <label key={key} className="text-xs">
-          <span className="block mb-0.5 font-medium capitalize">
-            {key} ₹
-          </span>
+          <span className="block mb-0.5 font-medium capitalize">{key} ₹</span>
           <input
             type="number"
             value={v[key] || ''}
