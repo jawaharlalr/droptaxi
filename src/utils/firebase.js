@@ -4,12 +4,12 @@ import { getFirestore } from 'firebase/firestore';
 
 // ✅ Firebase config
 const firebaseConfig = {
-  apiKey: "AIzaSyAr1pQd8dCjmYBN4ujGORYSCLb4GhEUddA",
-  authDomain: "pranavdroptaxi-9e31b.firebaseapp.com",
-  projectId: "pranavdroptaxi-9e31b",
-  storageBucket: "pranavdroptaxi-9e31b.firebasestorage.app",
-  messagingSenderId: "610007777923",
-  appId: "1:610007777923:web:d2071b21ea6000fd5f11b6"
+  apiKey: "AIzaSyAH6mQtHLu3gqtPrwAi-67S-VwNYWAwE2c",
+  authDomain: "pranavdroptaxi-808ff.firebaseapp.com",
+  projectId: "pranavdroptaxi-808ff",
+  storageBucket: "pranavdroptaxi-808ff.firebasestorage.app",
+  messagingSenderId: "473028998497",
+  appId: "1:473028998497:web:776e4c40d3b3985ae7c120"
 };
 
 // ✅ Initialize Firebase
